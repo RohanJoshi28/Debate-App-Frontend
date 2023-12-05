@@ -6,7 +6,6 @@ import './AuthButton.css'; // You will create this CSS file for styling
 function AuthButton() {
 
   
-  console.log("hello");
   const handleClick = () => {
     axios.post('http://127.0.0.1:5000/increment')
       .then(response => {
@@ -31,7 +30,6 @@ function AuthButton() {
 
   const [confirmed, setConfirmed] = useState(false);
   const [ user, setUser ] = useState({});
-  const [name, setName] = useState("");
 
   function handleCallbackResponse(response){
 
@@ -39,11 +37,15 @@ function AuthButton() {
     var userObject = jwtDecode(response.credential);
     setUser(userObject);
     document.getElementById("signInDiv").hidden = true;
-    console.log(user.name)
-
-    handleLoginClick();
-    handleClick();
   }
+  
+  useEffect(() => {
+    if (user) { // Check if user is not null
+      handleLoginClick();
+      handleClick();
+      // ... other actions dependent on user
+    }
+  }, [user]);
 
   function handleSignOut(event) {
     setUser({});
