@@ -23,7 +23,6 @@ function AuthButton() {
     })
     .then(function (response) {
       console.log(response);
-      setName(user.name)
     })
     .catch(function (error) {
       console.log(error);
