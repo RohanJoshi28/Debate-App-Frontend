@@ -5,15 +5,45 @@ import './AuthButton.css'; // You will create this CSS file for styling
 
 function AuthButton() {
 
+  
+  console.log("hello");
+  const handleClick = () => {
+    axios.post('http://127.0.0.1:5000/increment')
+      .then(response => {
+        setConfirmed(true);
+      })
+      .catch(error => console.error('Error:', error));
+  };
+  
+  const handleLoginClick = () => {
+
+    axios.post('http://127.0.0.1:5000/save_email', {
+      name: user.name,
+      email: user.email
+    })
+    .then(function (response) {
+      console.log(response);
+      setName(user.name)
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  };
+
   const [confirmed, setConfirmed] = useState(false);
   const [ user, setUser ] = useState({});
-
+  const [name, setName] = useState("");
 
   function handleCallbackResponse(response){
+
     console.log("Encoded JWT ID token: " + response.credential);
     var userObject = jwtDecode(response.credential);
     setUser(userObject);
     document.getElementById("signInDiv").hidden = true;
+    console.log(user.name)
+
+    handleLoginClick();
+    handleClick();
   }
 
   function handleSignOut(event) {
@@ -42,8 +72,6 @@ function AuthButton() {
       { Object.keys(user).length != 0 &&
         <button onClick={ (e) => handleSignOut(e)}>Sign Out</button>
       }
-
-
       
       { user &&
         <div>
@@ -53,16 +81,10 @@ function AuthButton() {
       }
     </div>
   );
-  console.log("hello")
+
   
 
-  const handleClick = () => {
-    axios.post('http://127.0.0.1:5000/increment')
-      .then(response => {
-        setConfirmed(true);
-      })
-      .catch(error => console.error('Error:', error));
-  };
+
 
   // return (
   //   <div>

@@ -6,7 +6,9 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
+        <h1>Debate Dashboard</h1>
         <AuthButton /> {/* Use AuthButton component */}
+        
       </header>
     </div>
   );
