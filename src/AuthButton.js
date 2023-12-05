@@ -7,10 +7,8 @@ function AuthButton() {
   const [confirmed, setConfirmed] = useState(false);
 
   const handleClick = () => {
-    console.log("hi")
-    axios.post('http://localhost:5000/increment')
+    axios.post('http://127.0.0.1:5000/increment')
       .then(response => {
-        console.log(response.data);
         setConfirmed(true);
       })
       .catch(error => console.error('Error:', error));
