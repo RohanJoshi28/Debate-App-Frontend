@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tournament #1 (JV)</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+  }
+
+  header {
+    background-color: #8a2be2;
+    color: #fff;
+    padding: 10px 20px;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  .schools, .schedule, footer {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .school, .round {
+    background-color: #eee;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+  }
+
+  button {
+    background-color: #8a2be2;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  table, th, td {
+    border: 1px solid #ddd;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 8px;
+  }
+
+  th {
+    background-color: #8a2be2;
+    color: white;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>EDIT - Tournament #1 (JV)</h1>
+  <button onclick="location.href='dashboard.html'">Return to Dashboard</button>
+</header>
+
+<section class="schools">
+  <div class="school">
+    <h3>A - Bergen Academies (Host)</h3>
+    <p>Debaters: 15</p>
+    <p>Judges: 15</p>
+    <p>Coach: Mr. Russo</p>
+    <button>Edit</button>
+  </div>
+  
+  <div class="school">
+    <h3>B - Glen Rock</h3>
+    <p>Debaters: 9</p>
+    <p>Judges: 4</p>
+    <p>Coach: Mr. Joshi</p>
+    <button>Edit</button>
+  </div>
+
+  <div class="school">
+    <h3>C - Old Tappan</h3>
+    <p>Debaters: 9</p>
+    <p>Judges: 3</p>
+    <p>Coach: Mr. Kim</p>
+    <button>Edit</button>
+  </div>
+
+  <div class="school">
+    <h3>D - Fort Lee</h3>
+    <p>Debaters: 3</p>
+    <p>Judges: 5</p>
+    <p>Coach: Mr. Rodriguez</p>
+    <button>Edit</button>
+  </div>
+
+  <div class="school">
+    <h3>E - Demarest</h3>
+    <p>Debaters: 7</p>
+    <p>Judges: 3</p>
+    <p>Coach: Mr. Krstevski</p>
+    <button>Edit</button>
+  </div>
+  
+</section>
+
+<button>Add More Schools</button>
+
+<section class="schedule">
+  <h2>Current Schedule / Matchups (Round 1)</h2>
+  <table>
+    <tr>
+      <th>Affirmative</th>
+      <th>Negative</th>
+      <th>Judge</th>
+      <th>Room</th>
+    </tr>
+    <tr>
+      <td>A1</td>
+      <td>B1</td>
+      <td>C1</td>
+      <td>42</td>
+    </tr>
+    <tr>
+      <td>A2</td>
+      <td>B2</td>
+      <td>C2</td>
+      <td>90</td>
+    </tr>
+    <tr>
+      <td>A3</td>
+      <td>B3</td>
+      <td>C3</td>
+      <td>115</td>
+    </tr>
+  </table>
+</section>
+
+<footer>
+  <button>Generate New Schedule</button>
+  <button>Manually Edit Schedule</button>
+  <button>Download/Print Schedule</button>
+</footer>
+
+</body>
+</html>
