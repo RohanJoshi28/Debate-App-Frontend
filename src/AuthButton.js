@@ -37,6 +37,8 @@ function AuthButton() {
     var userObject = jwtDecode(response.credential);
     setUser(userObject);
     document.getElementById("signInDiv").hidden = true;
+    
+    window.location.href= "./helloWorld.html";
   }
   
   useEffect(() => {
@@ -81,6 +83,7 @@ function AuthButton() {
         </div>
       }
     </div>
+
   );
 
   
