@@ -38,7 +38,7 @@ function AuthButton() {
     setUser(userObject);
     document.getElementById("signInDiv").hidden = true;
     
-    window.location.href= "./helloWorld.html";
+    window.location.href= "./dashboard.html";
   }
   
   useEffect(() => {
