@@ -1,5 +1,11 @@
 import React from 'react';
 import './Dashboard.css';
+import './App.css';
+import './AddTournament.js'
+
+
+function handleAddTournamentButtonOnClick(event) {
+}
 
 function Dashboard() {
   return (
@@ -11,7 +17,7 @@ function Dashboard() {
 <div class="navbar">
   <a href="dashboard.html" class="active">Dashboard</a>
   <a href="leader.html">Leaderboard</a>
-  <a href="#admin">Welcome, Admin</a>
+  <a href="#admin">Welcome, Admin</a>4
   <a href="/" style={{ float: "right" }}>
     Log Out
   </a>
@@ -70,7 +76,7 @@ function Dashboard() {
 
   </div>
   <div class="add-tournament-card">
-    +
+    <button onClick={ (e) => handleAddTournamentButtonOnClick}>+</button>
   </div>
 </div>
 
