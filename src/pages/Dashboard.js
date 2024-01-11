@@ -1,7 +1,15 @@
 import React from 'react';
 import './Dashboard.css';
+import { useNavigate } from 'react-router-dom';
+import Edit_Tournament from './Edit_Tournament';
+
 
 function Dashboard() {
+  let navigate = useNavigate();
+  const routeChange = () =>{
+    let path = '../Edit_Tournament';
+    navigate(path);
+  }
   return (
     <div>
       <div class="header">
@@ -29,7 +37,7 @@ function Dashboard() {
     <p>Schools attending: 10</p>
     <p>Location: Bergen County Academies</p>
     <p>Judges: 30</p>
-    <button onclick="window.location='edit_tournament.html'">Edit</button>
+    <button onClick={routeChange}>Edit</button>
   
   </div>
 

@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from './Home';
 import Dashboard from './Dashboard';
 import Leaderboard from './Leaderboard';
+import Edit_Tournament from './Edit_Tournament';
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path="/" element={<Home />}/>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="leaderboard" element={<Leaderboard />} />
+          <Route path="Edit_Tournament" element={<Edit_Tournament />} />
         </Routes>
       </BrowserRouter>
     </div>
