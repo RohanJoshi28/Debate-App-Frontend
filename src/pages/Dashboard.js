@@ -9,8 +9,8 @@ function Dashboard() {
 </div>
 
 <div class="navbar">
-  <a href="dashboard.html" class="active">Dashboard</a>
-  <a href="leader.html">Leaderboard</a>
+  <a href="dashboard" class="active">Dashboard</a>
+  <a href="leaderboard">Leaderboard</a>
   <a href="#admin">Welcome, Admin</a>
   <a href="/" style={{ float: "right" }}>
     Log Out
