@@ -1,5 +1,11 @@
 import React from 'react';
 import './Dashboard.css';
+import './App.css';
+import './AddTournament.js'
+
+
+function handleAddTournamentButtonOnClick(event) {
+}
 import { useNavigate } from 'react-router-dom';
 import Edit_Tournament from './Edit_Tournament';
 
@@ -78,7 +84,7 @@ function Dashboard() {
 
   </div>
   <div class="add-tournament-card">
-    +
+    <button onClick={ (e) => handleAddTournamentButtonOnClick}>+</button>
   </div>
 </div>
 
