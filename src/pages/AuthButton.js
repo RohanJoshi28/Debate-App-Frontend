@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
-import './AuthButton.css'; // You will create this CSS file for styling
+import './AuthButton.css'; 
+import { useNavigate } from 'react-router-dom';
 
 function AuthButton() {
 
-  
+  let token = "";
+  let navigate = useNavigate();
+  const routeChange = () =>{
+    let path = '../Dashboard';
+    navigate(path);
+  }
+
   const handleClick = () => {
     axios.post('http://127.0.0.1:5000/increment')
       .then(response => {
@@ -15,8 +22,9 @@ function AuthButton() {
   };
   
   const handleLoginClick = () => {
-
     axios.post('http://127.0.0.1:5000/save_email', {
+      
+      id: token,
       name: user.name,
       email: user.email
     })
@@ -33,6 +41,7 @@ function AuthButton() {
 
   function handleCallbackResponse(response){
 
+    token = response.credential;
     console.log("Encoded JWT ID token: " + response.credential);
     var userObject = jwtDecode(response.credential);
     setUser(userObject);
@@ -81,6 +90,7 @@ function AuthButton() {
           <img src={user.picture}></img>
           <h3>{user.name}</h3>
         </div>
+
       }
     </div>
 

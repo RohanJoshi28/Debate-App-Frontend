@@ -2,12 +2,12 @@ import React from 'react';
 import './Dashboard.css';
 import './App.css';
 import './AddTournament.js'
-
+import { useNavigate } from 'react-router-dom';
+import Edit_Tournament from './Edit_Tournament';
 
 function handleAddTournamentButtonOnClick(event) {
 }
-import { useNavigate } from 'react-router-dom';
-import Edit_Tournament from './Edit_Tournament';
+
 
 
 function Dashboard() {
@@ -19,24 +19,28 @@ function Dashboard() {
   return (
     <div>
       <div class="header">
-  <h2>Debate Tournament Dashboard</h2>
-</div>
+        <div class="navbar">
+          <a href="dashboard" class="active">Dashboard</a>
+          <a href="leaderboard">Leaderboard</a>
+          <a href="#admin">Welcome, Admin</a>
+          <a href="/" style={{ float: "right" }}>
+            Log Out
+          </a>
 
-<div class="navbar">
-  <a href="dashboard" class="active">Dashboard</a>
-  <a href="leaderboard">Leaderboard</a>
-  <a href="#admin">Welcome, Admin</a>
-  <a href="/" style={{ float: "right" }}>
-    Log Out
-  </a>
+        </div>
 
-</div>
+        <h1>Debate Tournament Dashboard</h1>
+  
+        <div class="tab">
+          <button class="tablinks active">Junior Varsity</button>
+          <button class="tablinks">Varsity</button>
+        </div>
+      </div>
+
+
 
 <div class="main">
-  <div class="tab">
-    <button class="tablinks active">Junior Varsity</button>
-    <button class="tablinks">Varsity</button>
-  </div>
+  
   <div class="tournament-card">
     <h4>Tournament 1</h4>
     <p>Date: 10/23/2023</p>

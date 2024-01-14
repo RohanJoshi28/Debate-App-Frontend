@@ -5,11 +5,8 @@ function Leaderboard() {
   return (
     <div>
       <div class="header">
-  <h2>Leaderboard</h2>
-</div>
 
-<>
-  <div className="navbar">
+      <div className="navbar">
     <a href="dashboard">Dashboard</a>
     <a href="leaderboard" className="active">
       Leaderboard
@@ -19,11 +16,18 @@ function Leaderboard() {
       Log Out
     </a>
   </div>
-  <div className="main">
-    <div className="tab">
+  <h1>Leaderboard</h1>
+
+  <div className="tab">
       <button className="tablinks active">Junior Varsity</button>
       <button className="tablinks">Varsity</button>
     </div>
+</div>
+
+<>
+  
+  <div className="main">
+    
     <div className="rank-section">
       <h2>JV Leaderboard 2023-2024</h2>
       <div>
