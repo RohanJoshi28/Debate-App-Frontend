@@ -28,6 +28,15 @@ async function getProtected() {
     .then((res) => res.json())
     .then((msg) => console.log(msg));
 }
+
+async function logOut(){
+  var response = await fetch("/logout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
 export default function Auth() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState({});
@@ -41,10 +50,9 @@ export default function Auth() {
   });
 
   const handleLogout = () => {
-    getProtected();
+    logOut();
     setLoggedIn(false);
   };
-
 
   return (
     <>
