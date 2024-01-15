@@ -4,11 +4,18 @@ import './App.css';
 import './AddTournament.js'
 import { useNavigate } from 'react-router-dom';
 import Edit_Tournament from './Edit_Tournament';
-
+import { Link } from 'react-router-dom';
 function handleAddTournamentButtonOnClick(event) {
 }
 
-
+async function logOut(){
+  var response = await fetch("/logout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
 
 function Dashboard() {
   let navigate = useNavigate();
@@ -23,9 +30,11 @@ function Dashboard() {
           <a href="dashboard" class="active">Dashboard</a>
           <a href="leaderboard">Leaderboard</a>
           <a href="#admin">Welcome, Admin</a>
-          <a href="/" style={{ float: "right" }}>
+          <Link to="#" onClick={() => this.logOut()}>Logout</Link>
+          {/* <a href="#" onClick={() => {this.logOut()}} style={{ float: "right" }}>Logout</a> */}
+          {/* <a href="/" style={{ float: "right" }}>
             Log Out
-          </a>
+          </a> */}
 
         </div>
 
