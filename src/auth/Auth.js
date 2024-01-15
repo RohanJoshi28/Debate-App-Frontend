@@ -5,7 +5,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import UserAvatar from "./UserAvatar";
 import Dashboard from "../pages/Dashboard";
 import { useLocation, Navigate, Outlet} from "react-router-dom"
-
+import "./Auth.css"
 
 async function getUserInfo(codeResponse) {
   var response = await fetch("/login", {
@@ -44,14 +44,21 @@ export default function Auth() {
 
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState({});
+  const [failedLogin, setFailedLogin] = useState(false);
   const googleLogin = useGoogleLogin({
     flow: "auth-code",
     onSuccess: async (codeResponse) => {
+      setFailedLogin(false);
       var loginDetails = await getUserInfo(codeResponse);
-      setLoggedIn(true);
-      setUser(loginDetails.user);
+      console.log(loginDetails)
+      if (loginDetails.user != null){
+        setLoggedIn(true);
+        setUser(loginDetails.user);
+      }
 
-    },
+      //User not whitelisted admin
+      setFailedLogin(true);
+    }
   });
 
   const handleLogout = () => {
@@ -59,19 +66,40 @@ export default function Auth() {
     setLoggedIn(false);
   };
 
-  if (!loggedIn){
+  if (!loggedIn && failedLogin){
     return (
       <>
-        <IconButton
+      <button type="button" class="google-sign-in-button" onClick={() => googleLogin()}>
+          Sign in with Google
+        </button>
+        {/* <IconButton
           color="primary"
           aria-label="add to shopping cart"
           onClick={() => googleLogin()}
         >
           <GoogleIcon fontSize="large" />
-        </IconButton>
+        </IconButton> */}
+
+        <p class="failed">Error: You are not a registered tournament administrator!</p>
       </>
     )
-  } else {
+  } else if (!loggedIn && !failedLogin){
+    return (
+      <>
+        <button type="button" class="google-sign-in-button" onClick={() => googleLogin()}>
+          Sign in with Google
+        </button>
+        {/* <IconButton
+          color="primary"
+          aria-label="add to shopping cart"
+          onClick={() => googleLogin()}
+        >
+          <GoogleIcon fontSize="large" />
+        </IconButton> */}
+      </>
+    )
+  } 
+  else {
     return <Navigate to="/dashboard" />
   }
 }

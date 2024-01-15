@@ -8,14 +8,7 @@ import { Link } from 'react-router-dom';
 function handleAddTournamentButtonOnClick(event) {
 }
 
-async function logOut(){
-  var response = await fetch("/logout", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-}
+
 
 function Dashboard() {
   let navigate = useNavigate();
@@ -23,19 +16,24 @@ function Dashboard() {
     let path = '../Edit_Tournament';
     navigate(path);
   }
+
+  async function logOut(){
+    var response = await fetch("/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+
   return (
     <div>
       <div class="header">
         <div class="navbar">
           <a href="dashboard" class="active">Dashboard</a>
           <a href="leaderboard">Leaderboard</a>
-          <a href="#admin">Welcome, Admin</a>
-          <Link to="#" onClick={() => this.logOut()}>Logout</Link>
-          {/* <a href="#" onClick={() => {this.logOut()}} style={{ float: "right" }}>Logout</a> */}
-          {/* <a href="/" style={{ float: "right" }}>
-            Log Out
-          </a> */}
-
+          <Link to="/" style={{ float: "right" }} onClick={async () => {await logOut();}}>Logout</Link>
         </div>
 
         <h1>Debate Tournament Dashboard</h1>
