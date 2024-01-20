@@ -3,8 +3,26 @@ import './App.css';
 import AuthButton from './AuthButton'; // Import AuthButton component
 import Auth from '../auth/Auth';
 import { GoogleOAuthProvider } from "@react-oauth/google";
-
+import useAuth from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 function Home() {
+
+  
+  const { auth } = useAuth();
+
+
+  let navigate = useNavigate();
+  const routeChange = () =>{
+    let path = '../Dashboard';
+    navigate(path);
+  }
+
+
+  if (auth.loggedin){
+    console.log("YO")
+    routeChange();
+  }
+
   return (
     <div className="App">
       <header className="App-header">

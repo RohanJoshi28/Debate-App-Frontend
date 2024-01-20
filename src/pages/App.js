@@ -7,15 +7,19 @@ import Dashboard from './Dashboard';
 import Leaderboard from './Leaderboard';
 import Edit_Tournament from './Edit_Tournament';
 import ProtectedRoute from '../auth/ProtectedRoute';
-
-
+import { AuthProvider } from '../contexts/AuthProvider';
+import RedirectRoute from '../auth/RedirectRoute';
 
 function App() {
   return (
     <div>
       <BrowserRouter>
+ 
+      <AuthProvider>
         <Routes>
-          <Route path="/" element={<Home />}/>
+          {/* <Route element={<RedirectRoute/>}> */}
+            <Route path="/" element={<Home />}/>
+          {/* </Route> */}
           <Route element={<ProtectedRoute/>}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="leaderboard" element={<Leaderboard />} />
@@ -24,6 +28,7 @@ function App() {
 
 
         </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </div>
   
@@ -31,3 +36,4 @@ function App() {
 }
 
 export default App;
+

@@ -6,6 +6,7 @@ import UserAvatar from "./UserAvatar";
 import Dashboard from "../pages/Dashboard";
 import { useLocation, Navigate, Outlet} from "react-router-dom"
 import "./Auth.css"
+import useAuth from '../hooks/useAuth';
 
 async function getUserInfo(codeResponse) {
   var response = await fetch("/login", {
@@ -45,6 +46,7 @@ export default function Auth() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState({});
   const [failedLogin, setFailedLogin] = useState(false);
+  const { setAuth } = useAuth();
   const googleLogin = useGoogleLogin({
     flow: "auth-code",
     onSuccess: async (codeResponse) => {
@@ -53,11 +55,13 @@ export default function Auth() {
       console.log(loginDetails)
       if (loginDetails.user != null){
         setLoggedIn(true);
-        setUser(loginDetails.user);
+        setAuth({"loggedin":true});
+      } else {
+        //User not a whitelisted admin
+        setFailedLogin(true);
       }
 
-      //User not whitelisted admin
-      setFailedLogin(true);
+      
     }
   });
 
