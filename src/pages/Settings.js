@@ -7,6 +7,7 @@ import useAuth from '../hooks/useAuth.js';
 import Header from '../components/header.js';
 import AdminManagement from '../components/AdminManagement.js'
 import InviteAdmin from '../components/InviteAdmin.js';
+import './Settings.css'; 
 function handleAddTournamentButtonOnClick(event) {
 }
 

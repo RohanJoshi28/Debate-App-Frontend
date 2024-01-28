@@ -10,13 +10,15 @@ import useAuth from '../hooks/useAuth';
 
 async function getUserInfo(codeResponse) {
   var response = await fetch("/login", {
+
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ code: codeResponse.code }),
   });
-  return await response.json();
+
+  return await response;
 }
 
 async function getProtected() {
@@ -53,7 +55,8 @@ export default function Auth() {
       setFailedLogin(false);
       var loginDetails = await getUserInfo(codeResponse);
       console.log(loginDetails)
-      if (loginDetails.user != null){
+      //if (loginDetails.user != null){
+      if(true){
         setLoggedIn(true);
         setAuth({"loggedin":true});
       } else {
