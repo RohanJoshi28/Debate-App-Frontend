@@ -9,16 +9,9 @@
     color: rgb(255, 255, 255);
 }
 
-.success {
-    border-radius: 25px;
-    background: #4fe082;
-    padding: 20px;
-    width: 500px;
-    height: 25px;
-    text-align:center;
-    font-size: large;
-    color: rgb(0, 0, 0);
-}
+
+
+
 
 .google-sign-in-button {
     cursor: pointer;

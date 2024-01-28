@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth.js';
 import Header from '../components/header.js';
 import AdminManagement from '../components/AdminManagement.js'
-import InviteAdmin from '../components/InviteAdmin.js';
+import InviteAdmin from '../components/Modals/InviteAdmin.js';
 function handleAddTournamentButtonOnClick(event) {
 }
 

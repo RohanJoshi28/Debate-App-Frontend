@@ -23,28 +23,6 @@ function InviteAdmin() {
       }
 
     
-  if (successSubmit){
-    return (
-        <div class="tournament-card">
-    
-            <h1>Invite Admin</h1>
-            <form method="post" onSubmit={handleSubmit}>
-          <label>
-            Name: <input name="name" />
-          </label>
-        
-        <p></p>
-          <label>
-            Email: <input name="email" />
-          </label>
-          
-          <hr />
-          <button type="submit">Submit</button>
-        </form>
-        <p class="success">Successully added new admin!</p>
-        </div>
-      );
-  } else {
     return (
         <div class="tournament-card">
     
@@ -64,7 +42,7 @@ function InviteAdmin() {
         </form>
         </div>
       );
-  }
+  
   
 }
 
