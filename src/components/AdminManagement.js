@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-const Fetch = () => {
+
+
+  const Fetch = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
     fetch('http://localhost:5000/users')
-      .then((res) => res.json()) // Convert the response to JSON
-      .then((data) => {
-        setUsers(data); // Set the users in state
+      .then((res) => {
+        return res.json();
+        //setUsers(res.data); // Set the users in state
       })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
-      });
+      .then((data) => {
+        setUsers(data);
+      })
   }, []);
 
   return (
     <div>
       <h2>Users</h2>
-      <table className="settings-table">
+      <table className="admin-table">
         <thead>
           <tr>
             <th>Name</th>
@@ -38,3 +41,7 @@ const Fetch = () => {
 }
 
 export default Fetch;
+
+
+
+
