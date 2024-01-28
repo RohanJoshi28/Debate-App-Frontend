@@ -35,7 +35,7 @@ function Dashboard() {
   return (
     
     <div>
-      <Header title="Debate Tournament Management"/>
+      <Header title="Debate Tournament Management" mode="true"/>
     
       <div class="main">
         

@@ -5,7 +5,7 @@ import Header from '../components/header';
 function Leaderboard() {
   return (
     <div>
-      <Header title="Leaderboard"/>
+      <Header title="Leaderboard" mode="true"/>
   
       <div className="main">
         

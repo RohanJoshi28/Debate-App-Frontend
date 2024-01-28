@@ -29,7 +29,6 @@ const ProtectedRoute = () => {
     const [isLoading, setLoading] = useState(true);
    
     getProtected().then((authorized) => {
-      console.log('a: ' + authorized)
       if (authorized) {
         setIsAuthorizedResult(true);
       } 

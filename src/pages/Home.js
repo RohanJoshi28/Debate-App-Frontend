@@ -5,23 +5,28 @@ import Auth from '../auth/Auth';
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import useAuth from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+
+
 function Home() {
 
   
   const { auth } = useAuth();
+  const [isLoggedin, setLoggedin] = useState(false);
 
+  
+  const navigate = useNavigate();
+  // const cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)logged_in\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-  let navigate = useNavigate();
-  const routeChange = () =>{
-    let path = '../Dashboard';
-    navigate(path);
-  }
+  // if (cookieValue == "yes"){
+  //   setLoggedin(true);
+  // }
 
-
-  if (auth.loggedin){
-    console.log("YO")
-    routeChange();
-  }
+  useEffect(() => {
+    if (isLoggedin) {
+      navigate('../dashboard');
+    }
+  }, [navigate]);
 
   return (
     <div className="App">
