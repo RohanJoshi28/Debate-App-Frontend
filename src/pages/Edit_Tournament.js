@@ -1,22 +1,21 @@
 import React from 'react';
 import { useEffect, useState} from 'react';
 import './Edit_Tournament.css';
-
-
-
+import axios from 'axios';
 
 function Edit_Tournament() {
 
   const [schedule, setSchedule] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/tournamentschedule/1')
-      .then((res) => {
-        return res.json();
+    axios.get('http://localhost:5000/tournamentschedule/1')
+      .then((response) => {
+        setSchedule(response.data);
       })
-      .then((data) => {
-        setSchedule(data);
-      })
+      .catch((error) => {
+        // Handle error
+        console.error('Error fetching schedule:', error);
+      });
   }, []);
 
 
