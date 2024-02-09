@@ -1,7 +1,25 @@
 import React from 'react';
+import { useEffect, useState} from 'react';
 import './Edit_Tournament.css';
 
+
+
+
 function Edit_Tournament() {
+
+  const [schedule, setSchedule] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/tournamentschedule/1')
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        setSchedule(data);
+      })
+  }, []);
+
+
   return (
     <div>
       
@@ -51,6 +69,9 @@ function Edit_Tournament() {
   <button>Add More Schools</button>
   <section className="schedule">
     <h2>Current Schedule / Matchups (Round 1)</h2>
+
+    <p>{schedule}</p>
+
     <table>
       <tbody>
         <tr>
