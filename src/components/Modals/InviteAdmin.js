@@ -4,6 +4,7 @@ import "./InviteAdmin.css";
 export default function InviteAdmin() {
     const [modal, setModal] = useState(false);
     const [isSuccess, setSuccess] = useState(false);
+    
     const toggleModal = () => {
         if (!modal){
             setSuccess(false);
@@ -24,6 +25,7 @@ export default function InviteAdmin() {
         fetch('http://127.0.0.1:5000/save_email', { method: form.method, body: formData });
         toggleModal();
         setSuccess(true);
+        window.location.reload();
     }
 
     if (modal){
@@ -35,7 +37,9 @@ export default function InviteAdmin() {
     return (
         <div>
         
-        
+        {isSuccess && (
+            <p class="success">Successully added new admin!</p>
+        )}
 
         <button
             onClick={toggleModal}
@@ -73,9 +77,7 @@ export default function InviteAdmin() {
         </div>
         )}
 
-        {isSuccess && (
-            <p class="success">Successully added new admin!</p>
-        )}
+        
 
         
 
