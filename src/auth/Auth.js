@@ -59,6 +59,7 @@ export default function Auth() {
       if(true){
         setLoggedIn(true);
         setAuth({"loggedin":true});
+        
       } else {
         //User not a whitelisted admin
         setFailedLogin(true);

@@ -22,6 +22,15 @@ async function getProtected() {
   }
   
 
+  async function logOut(){
+    var response = await fetch("/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
 const ProtectedRoute = () => {
 
     const location = useLocation();
@@ -48,6 +57,7 @@ const ProtectedRoute = () => {
           </div>
         )
       } else {
+        logOut();
         return <Navigate to="/" />
       }
       

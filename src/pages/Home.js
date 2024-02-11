@@ -6,6 +6,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import useAuth from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { TramRounded } from '@mui/icons-material';
 
 
 function Home() {
@@ -16,14 +17,14 @@ function Home() {
 
   
   const navigate = useNavigate();
-  // const cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)logged_in\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  const cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)logged_in\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
   // if (cookieValue == "yes"){
   //   setLoggedin(true);
   // }
 
   useEffect(() => {
-    if (isLoggedin) {
+    if (cookieValue == "yes") {
       navigate('../dashboard');
     }
   }, [navigate]);
