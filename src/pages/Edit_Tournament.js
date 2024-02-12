@@ -9,12 +9,19 @@ function Edit_Tournament() {
   const [schedule, setSchedule] = useState([]);
   const [roundsData, setRoundsData] = useState([]);
   const [pdfTitle, setTitle] = useState("Schedule");
+  const [schools, setSchools] = useState([]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSchool, setSelectedSchool] = useState(null);
+  
 
   useEffect(() => {
     axios.get('http://localhost:5000/tournamentschedule/1')
       .then((response) => {
+        const tournamentData = response.data;
         setSchedule(response.data);
         console.log(response.data);
+        setSchools(tournamentData.schools);
       })
       .catch((error) => {
         // Handle error
@@ -131,7 +138,7 @@ function Edit_Tournament() {
     },
   };
 
-
+//Dynamic addition
   return (
     
     <div>
@@ -140,42 +147,18 @@ function Edit_Tournament() {
         <a href="dashboard" class="active">Dashboard</a>
       </header>
       <section className="schools">
-        <div className="school">
-          <h3>A - Bergen Academies (Host)</h3>
-          <p>Debaters: 15</p>
-          <p>Judges: 15</p>
-          <p>Coach: Mr. Russo</p>
-          <button>Edit</button>
-        </div>
-        <div className="school">
-          <h3>B - Glen Rock</h3>
-          <p>Debaters: 9</p>
-          <p>Judges: 4</p>
-          <p>Coach: Mr. Joshi</p>
-          <button>Edit</button>
-        </div>
-        <div className="school">
-          <h3>C - Old Tappan</h3>
-          <p>Debaters: 9</p>
-          <p>Judges: 3</p>
-          <p>Coach: Mr. Kim</p>
-          <button>Edit</button>
-        </div>
-        <div className="school">
-          <h3>D - Fort Lee</h3>
-          <p>Debaters: 3</p>
-          <p>Judges: 5</p>
-          <p>Coach: Mr. Rodriguez</p>
-          <button>Edit</button>
-        </div>
-        <div className="school">
-          <h3>E - Demarest</h3>
-          <p>Debaters: 7</p>
-          <p>Judges: 3</p>
-          <p>Coach: Mr. Krstevski</p>
-          <button>Edit</button>
-        </div>
-        </section>
+  {schools.map((school, index) => (
+    <div className="school" key={index}>
+      <h3>{school.name}</h3>
+      <p>Debaters: {school.num_debaters}</p>
+      <p>Judges: {school.num_judges}</p>
+      <p>Coach: {renderCoachName(school.coach)}</p>
+      <button onClick={() => handleEditClick(school)}>Edit</button>
+    </div>
+  ))}
+</section>
+
+
 
 
       <section className="schedule">
@@ -213,7 +196,35 @@ function Edit_Tournament() {
       </footer>
     </div>
   );
+
+
+  //Everything here onwards is to work on the form for edit...
+  const handleEditClick = (school) => {
+    setSelectedSchool(school);
+    setIsModalOpen(true);
+  };
+  const handleSave = (schoolId, updatedSchoolData) => {
+    axios.put(`http://localhost:5000/school/${schoolId}`, updatedSchoolData)
+      .then(response => {
+        setIsModalOpen(false);
+        setSchools(schools.map(school => school.id === schoolId ? {...school, ...updatedSchoolData} : school));
+      })
+      .catch(error => {
+        console.error('Error updating school:', error);
+      });
+  };
+  
+  
+  
+  
 };
+
+function renderCoachName(coach) {
+  if (coach && coach.name) {
+    return coach.name;
+  }
+  return 'No coach';
+}
 
 
 
