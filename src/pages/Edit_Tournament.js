@@ -5,6 +5,7 @@ import axios from 'axios';
 import { PDFViewer, Document, Page, View, Text } from '@react-pdf/renderer';
 import ReactDOM from 'react-dom'; 
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function Edit_Tournament() {
   const [schedule, setSchedule] = useState([]);
@@ -12,6 +13,11 @@ function Edit_Tournament() {
   const [pdfTitle, setTitle] = useState("Schedule");
   const [schools, setSchools] = useState([]);
   const { tournamentNumber } = useParams();
+  let navigate = useNavigate();
+
+  const routeChange = () => {
+    navigate(`/dashboard`);
+  }
 
   useEffect(() => {
     axios.get(`http://localhost:5000/tournamentschedule/${tournamentNumber}`)
@@ -147,10 +153,11 @@ function Edit_Tournament() {
 
   return (
     <div>
-      <header>
-        <h1>EDIT - Tournament</h1>
-        <a href="../dashboard" className="active">Dashboard</a>
+      <header className="edittournamentheader">
+        <h1>Edit Tournament {tournamentNumber}</h1>
+        <button onClick={() => routeChange()}>Return to Dashboard</button>
       </header>
+      
       <section className="schools">
         {schools.map((school, index) => (
           <div className="school" key={index}>
