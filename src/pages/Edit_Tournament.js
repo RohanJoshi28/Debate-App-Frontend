@@ -162,7 +162,7 @@ function Edit_Tournament() {
         {schools.map((school, index) => (
           <div className="school" key={index}>
             <h3>{String.fromCharCode(65 + index)} - {school.name}</h3>
-            <p>Debaters: {school.num_debaters}</p>
+            <p>Pairs: {school.num_debaters}</p>
             <p>Judges: {school.num_judges}</p>
             <p>Coach: {school.coach}</p>
             <button>Edit</button>
