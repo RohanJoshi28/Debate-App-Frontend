@@ -15,6 +15,19 @@ body.active-modal {
     color: rgb(0, 0, 0);
 }
 
+.fail {
+    border-radius: 25px;
+    margin:auto;
+    margin-top: 25px;
+    background: #e04f71;
+    padding: 20px;
+    width: 500px;
+    height: 25px;
+    text-align:center;
+    font-size: large;
+    color: rgb(255, 255, 255);
+}
+
 .btn-modal {
     padding: 10px 20px;
     display: block;

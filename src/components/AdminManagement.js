@@ -1,48 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-
-
-  const Fetch = () => {
-
-  const [userDeleteQuery, queryDelete] = useState(false);
+const Fetch = () => {
   const [userEmailToDelete, setDeleteEmail] = useState("");
   const [users, setUsers] = useState([]);
-
+  const [invalidDelete, setInvalidDelete] = useState(false);
+  const [successDelete, setSuccessDelete] = useState(false);
   useEffect(() => {
-    fetch('http://localhost:5000/users')
-      .then((res) => {
-        return res.json();
-        //setUsers(res.data); // Set the users in state
-      })
-      .then((data) => {
-        setUsers(data);
-      })
+    fetchUsers();
   }, []);
 
-  const queryUserDelete = (email) => {
-    setDeleteEmail(email);
-    queryDelete(true);
-    window.location.reload();
-  }
-  const deleteUser = (email) => {
-    axios.post('http://127.0.0.1:5000/deleteuser', {
-      email: email
-    })
-    .then(function (response) {
-      console.log(response);
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-    
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/users');
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  const queryUserDelete = async (email) => {
+    try {
+      const response = await fetch("/protected", {
+        method: "GET",
+        credentials: "include",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const currentUserData = await response.json(); 
+      const currentUserEmail = currentUserData.logged_in_as;
+      console.log("Current user email:", currentUserEmail);
+      if (currentUserEmail === email) {
+        console.log("Cannot delete the currently logged-in user.");
+        setInvalidDelete(true);
+        return;
+      }
+      setDeleteEmail(email);
+    } catch (error) {
+      console.error("Error fetching current user email:", error);
+    }
+  };
+
+  const deleteUser = async (email) => {
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/deleteuser', { email });
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
   };
 
   useEffect(() => {
-    if (userDeleteQuery) { // if user is queried for deletion
+    if (userEmailToDelete) {
+      console.log("Deleting user with email:", userEmailToDelete);
       deleteUser(userEmailToDelete);
+      setSuccessDelete(true);
+      window.location.reload();
     }
-  });
+  }, [userEmailToDelete]);
 
   return (
     <div>
@@ -68,12 +86,15 @@ import axios from 'axios';
         </tbody>
       </table>
 
+      {successDelete && (
+            <p class="success">Successully deleted user: {userEmailToDelete}</p>
+        )}
+
+      {invalidDelete && (
+                  <p class="fail">You cannot remove yourself as an admin!</p>
+              )}
     </div>
   );
-}
+};
 
 export default Fetch;
-
-
-
-
