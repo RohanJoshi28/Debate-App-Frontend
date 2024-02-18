@@ -25,6 +25,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="leaderboard" element={<Leaderboard />} />
             <Route path="edit_tournament" element={<Edit_Tournament />} />
+            <Route path="/edit-tournament/:tournamentNumber" element={<Edit_Tournament />} />
             <Route path="settings" element={<Settings/>} />
           </Route>
 

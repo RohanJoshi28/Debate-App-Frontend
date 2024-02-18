@@ -4,28 +4,28 @@ import './Edit_Tournament.css';
 import axios from 'axios';
 import { PDFViewer, Document, Page, View, Text } from '@react-pdf/renderer';
 import ReactDOM from 'react-dom'; 
-function Edit_Tournament() {
+import { useParams } from 'react-router-dom';
 
+function Edit_Tournament() {
   const [schedule, setSchedule] = useState([]);
   const [roundsData, setRoundsData] = useState([]);
   const [pdfTitle, setTitle] = useState("Schedule");
   const [schools, setSchools] = useState([]);
+  const { tournamentNumber } = useParams();
 
   useEffect(() => {
-    axios.get('http://localhost:5000/tournamentschedule/1')
+    axios.get(`http://localhost:5000/tournamentschedule/${tournamentNumber}`)
       .then((response) => {
         setSchedule(response.data);
         console.log(response.data);
       })
       .catch((error) => {
-        // Handle error
         console.error('Error fetching schedule:', error);
       });
-  }, []);
+  }, [tournamentNumber]);
 
-  //Get tournament data
   useEffect(() => {
-    axios.get('http://localhost:5000/tournament/1')
+    axios.get(`http://localhost:5000/tournament/${tournamentNumber}`)
       .then((response) => {
         setSchools(response.data.schools);
         console.log(schools);
@@ -33,7 +33,7 @@ function Edit_Tournament() {
       .catch((error) => {
         console.error('Error fetching data:', error);
       });
-  }, []);
+  }, [tournamentNumber]);
 
 
   useEffect(() => {
@@ -149,7 +149,7 @@ function Edit_Tournament() {
     <div>
       <header>
         <h1>EDIT - Tournament</h1>
-        <a href="dashboard" className="active">Dashboard</a>
+        <a href="../dashboard" className="active">Dashboard</a>
       </header>
       <section className="schools">
         {schools.map((school, index) => (

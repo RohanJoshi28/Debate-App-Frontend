@@ -46,9 +46,8 @@ function Dashboard() {
     navigate('/login');
   }
 
-  const routeChange = () =>{
-    let path = '../Edit_Tournament';
-    navigate(path);
+  const routeChange = (tournamentNumber) => {
+    navigate(`/edit-tournament/${tournamentNumber}`);
   }
 
   return (
@@ -63,7 +62,7 @@ function Dashboard() {
             <p>Schools attending: {tournament.schools.length}</p>
             <p>Location: {tournament.host_school.name}</p>
             <p>Judges: {tournament.totalJudges}</p>
-            <button onClick={routeChange}>Edit</button>
+            <button onClick={() => routeChange(tournament.id)}>Edit</button>
           </div>
         ))}
         <div className="add-tournament-card">
