@@ -9,6 +9,7 @@ function Edit_Tournament() {
   const [schedule, setSchedule] = useState([]);
   const [roundsData, setRoundsData] = useState([]);
   const [pdfTitle, setTitle] = useState("Schedule");
+  const [schools, setSchools] = useState([]);
 
   useEffect(() => {
     axios.get('http://localhost:5000/tournamentschedule/1')
@@ -19,6 +20,18 @@ function Edit_Tournament() {
       .catch((error) => {
         // Handle error
         console.error('Error fetching schedule:', error);
+      });
+  }, []);
+
+  //Get tournament data
+  useEffect(() => {
+    axios.get('http://localhost:5000/tournament/1')
+      .then((response) => {
+        setSchools(response.data.schools);
+        console.log(schools);
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
       });
   }, []);
 
@@ -133,49 +146,22 @@ function Edit_Tournament() {
 
 
   return (
-    
     <div>
-    <header>
+      <header>
         <h1>EDIT - Tournament</h1>
-        <a href="dashboard" class="active">Dashboard</a>
+        <a href="dashboard" className="active">Dashboard</a>
       </header>
       <section className="schools">
-        <div className="school">
-          <h3>A - Bergen Academies (Host)</h3>
-          <p>Debaters: 15</p>
-          <p>Judges: 15</p>
-          <p>Coach: Mr. Russo</p>
-          <button>Edit</button>
-        </div>
-        <div className="school">
-          <h3>B - Glen Rock</h3>
-          <p>Debaters: 9</p>
-          <p>Judges: 4</p>
-          <p>Coach: Mr. Joshi</p>
-          <button>Edit</button>
-        </div>
-        <div className="school">
-          <h3>C - Old Tappan</h3>
-          <p>Debaters: 9</p>
-          <p>Judges: 3</p>
-          <p>Coach: Mr. Kim</p>
-          <button>Edit</button>
-        </div>
-        <div className="school">
-          <h3>D - Fort Lee</h3>
-          <p>Debaters: 3</p>
-          <p>Judges: 5</p>
-          <p>Coach: Mr. Rodriguez</p>
-          <button>Edit</button>
-        </div>
-        <div className="school">
-          <h3>E - Demarest</h3>
-          <p>Debaters: 7</p>
-          <p>Judges: 3</p>
-          <p>Coach: Mr. Krstevski</p>
-          <button>Edit</button>
-        </div>
-        </section>
+        {schools.map((school, index) => (
+          <div className="school" key={index}>
+            <h3>{String.fromCharCode(65 + index)} - {school.name}</h3>
+            <p>Debaters: {school.num_debaters}</p>
+            <p>Judges: {school.num_judges}</p>
+            <p>Coach: {school.coach}</p>
+            <button>Edit</button>
+          </div>
+        ))}
+      </section>
 
 
       <section className="schedule">
