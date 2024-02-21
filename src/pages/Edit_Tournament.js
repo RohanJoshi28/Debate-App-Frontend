@@ -7,12 +7,16 @@ import ReactDOM from 'react-dom';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
+
 function Edit_Tournament() {
   const [schedule, setSchedule] = useState([]);
   const [roundsData, setRoundsData] = useState([]);
   const [pdfTitle, setTitle] = useState("Schedule");
   const [schools, setSchools] = useState([]);
   const { tournamentNumber } = useParams();
+  const [showModal, setShowModal] = useState(false);
+  const [selectedSchool, setSelectedSchool] = useState(-1);
+  const [invalidInput, setInvalidInput] = useState(false)
   let navigate = useNavigate();
 
   const routeChange = () => {
@@ -56,6 +60,57 @@ function Edit_Tournament() {
   
     setRoundsData(parsedRoundsData);
   }, [schedule]);
+
+
+  //MODAL STUFF
+  const [modal, setModal] = useState(false);
+  const [isSuccess, setSuccess] = useState(false);
+  
+  const toggleModal = () => {
+      if (!modal){
+          setSuccess(false);
+          setInvalidInput(false);
+      }
+      setModal(!modal);
+      
+      
+  }
+
+  function editButton(selectedSchoolID) {
+    toggleModal();
+    setSelectedSchool(selectedSchoolID);
+  }
+
+  function handleSubmit(e) {
+      // Prevent the browser from reloading the page
+      e.preventDefault();
+      // Read the form data
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const pairs = parseInt(formData.get('pairs')); // Parse input as integer
+      const judges = parseInt(formData.get('judges')); // Parse input as integer
+      
+      // Check if inputs are numerical
+      if (isNaN(pairs) || isNaN(judges)) {
+          toggleModal();
+          setInvalidInput(true)
+          return;
+      }
+      fetch(`http://localhost:5000/updateschool/${selectedSchool}`, { method: form.method, body: formData });
+      toggleModal();
+      setSuccess(true);
+      window.location.reload();
+  }
+
+  if (modal){
+      document.body.classList.add('active-modal')
+  } else {
+      document.body.classList.remove('active-modal')
+  }
+
+  
+
 
   const transformTeam = (team) => {
     const [first, second] = team.split('~');
@@ -157,7 +212,15 @@ function Edit_Tournament() {
         <h1>Edit Tournament {tournamentNumber}</h1>
         <button onClick={() => routeChange()}>Return to Dashboard</button>
       </header>
-      
+
+      {invalidInput && (
+                  <p class="fail">Please enter in a valid integer!</p>
+              )}
+
+      {isSuccess && (
+                        <p class="success">Successfully edited school!</p>
+                    )}
+        
       <section className="schools">
         {schools.map((school, index) => (
           <div className="school" key={index}>
@@ -165,9 +228,11 @@ function Edit_Tournament() {
             <p>Pairs: {school.num_debaters}</p>
             <p>Judges: {school.num_judges}</p>
             <p>Coach: {school.coach}</p>
-            <button>Edit</button>
+            <button onClick={() => editButton(school.id)}>Edit</button>
           </div>
+          
         ))}
+     
       </section>
 
 
@@ -199,6 +264,36 @@ function Edit_Tournament() {
       ))}
 
     </section>
+    
+    {modal && (
+            <div className="modal">
+            <div onClick={toggleModal} className="overlay"></div>
+            <div className="modal-content">
+                <h1>Edit School</h1>
+                <form method="post" onSubmit={handleSubmit}>
+            <label>
+                Num Pairs: <input name="pairs" />
+            </label>
+            
+            <p></p>
+            <label>
+                Num Judges: <input name="judges" />
+            </label>
+            
+            <hr />
+            <button type="submit">Save</button>
+            </form>
+            <button
+                className='close-modal'
+                onClick={toggleModal}>
+                Close
+            </button>
+            </div>
+
+        </div>
+        )}
+
+
       <footer>
         <button>Generate New Schedule</button>
         <button>Manually Edit Schedule</button>
