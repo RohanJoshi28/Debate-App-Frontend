@@ -97,16 +97,20 @@ function Edit_Tournament() {
           setInvalidInput(true)
           return;
       }
-      fetch(`http://localhost:5000/updateschool/${selectedSchool}`, { method: form.method, body: formData });
+      // fetch(`http://localhost:5000/updateschool/${selectedSchool}`, { method: form.method, body: formData });
       toggleModal();
-      setSuccess(true);
-      window.location.reload();
+      // setSuccess(true);
+      fetch(`http://localhost:5000/updateschool/${selectedSchool}`, { method: form.method, body: formData }).then(
+        window.location.reload()
+      );
+      
   }
 
   if (modal){
       document.body.classList.add('active-modal')
   } else {
       document.body.classList.remove('active-modal')
+      
   }
 
   
@@ -227,7 +231,6 @@ function Edit_Tournament() {
             <h3>{String.fromCharCode(65 + index)} - {school.name}</h3>
             <p>Pairs: {school.num_debaters}</p>
             <p>Judges: {school.num_judges}</p>
-            <p>Coach: {school.coach}</p>
             <button onClick={() => editButton(school.id)}>Edit</button>
           </div>
           
