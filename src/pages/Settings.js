@@ -17,7 +17,7 @@ function Settings() {
   return (
     
     <div>
-      <Header title="Settings"/>
+      <Header title="User Management"/>
     
       <div class="main">
         <AdminManagement/>

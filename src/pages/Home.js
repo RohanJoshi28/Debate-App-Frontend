@@ -32,7 +32,7 @@ function Home() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Debate Dashboard</h1>
+        <h1>Debate League Dashboard</h1>
 
         <GoogleOAuthProvider clientId="955820545978-t2p3gj01oa82sqngom0c9uj4clgd9t4f.apps.googleusercontent.com">
         <Auth></Auth>

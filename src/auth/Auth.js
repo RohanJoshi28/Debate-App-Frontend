@@ -54,12 +54,9 @@ export default function Auth() {
     onSuccess: async (codeResponse) => {
       setFailedLogin(false);
       var loginDetails = await getUserInfo(codeResponse);
-      console.log(loginDetails)
-      //if (loginDetails.user != null){
-      if(true){
+      if (true){
         setLoggedIn(true);
         setAuth({"loggedin":true});
-        
       } else {
         //User not a whitelisted admin
         setFailedLogin(true);
@@ -75,6 +72,7 @@ export default function Auth() {
   };
 
   if (!loggedIn && failedLogin){
+
     return (
       <>
       <button type="button" class="google-sign-in-button" onClick={() => googleLogin()}>
