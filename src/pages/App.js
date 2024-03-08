@@ -10,6 +10,7 @@ import ProtectedRoute from '../auth/ProtectedRoute';
 import { AuthProvider } from '../contexts/AuthProvider';
 import RedirectRoute from '../auth/RedirectRoute';
 import Settings from './Settings'
+import AddTournamentPage from './AddTournament';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="leaderboard" element={<Leaderboard />} />
             <Route path="edit_tournament" element={<Edit_Tournament />} />
             <Route path="/edit-tournament/:tournamentNumber" element={<Edit_Tournament />} />
+            <Route path="/addtournament" element={<AddTournamentPage />} />
             <Route path="settings" element={<Settings/>} />
           </Route>
 

@@ -91,6 +91,10 @@ function Dashboard() {
     navigate(`/edit-tournament/${tournamentNumber}`);
   }
 
+  const routeChangeAddTournament = () => {
+    navigate(`/addtournament`);
+  }
+
   return (
     <div>
       <Header title="Debate Tournament Management" mode="true"/>
@@ -107,7 +111,7 @@ function Dashboard() {
           </div>
         ))}
         <div className="add-tournament-card">
-          <button onClick={handleAddTournamentButtonOnClick}>+</button>
+          <button onClick={() => routeChangeAddTournament()}>+</button>
         </div>
         {isAddTournamentModalVisible && (
         <div className="modal">
