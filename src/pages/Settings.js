@@ -21,7 +21,7 @@ function Settings() {
     
       <div class="main">
         <AdminManagement/>
-        <InviteAdmin/>
+        {/* <InviteAdmin/> */}
       </div>
     </div>
   );

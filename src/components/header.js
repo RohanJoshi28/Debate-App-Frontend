@@ -42,6 +42,7 @@ function Header(props) {
           <a href="dashboard">Dashboard</a>
           <a href="leaderboard">Leaderboard</a>
           <a href="settings">User Management</a>
+          <a href="schoolsettings">School Management</a>
           <Link to="/" style={{ float: "right" }} onClick={async () => {await logOut();}}>Logout</Link>
         </div>
 

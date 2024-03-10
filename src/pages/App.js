@@ -11,7 +11,8 @@ import { AuthProvider } from '../contexts/AuthProvider';
 import RedirectRoute from '../auth/RedirectRoute';
 import Settings from './Settings'
 import AddTournamentPage from './AddTournament';
-
+import AddSchool
+ from './AddSchool';
 function App() {
   return (
     <div>
@@ -29,6 +30,7 @@ function App() {
             <Route path="/edit-tournament/:tournamentNumber" element={<Edit_Tournament />} />
             <Route path="/addtournament" element={<AddTournamentPage />} />
             <Route path="settings" element={<Settings/>} />
+            <Route path="schoolsettings" element={<AddSchool/>} />
           </Route>
 
 

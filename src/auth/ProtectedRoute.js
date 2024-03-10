@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 
 async function getProtected() {
+      // return true; //debug
       const response = await fetch("/protected", {
         method: "GET",
         credentials: "include",

@@ -1,0 +1,23 @@
+.table-container {
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+
+.table {
+    width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  padding: 10px; /* Adjust the padding value as needed */
+}
+.table td {
+  max-width: 1px;
+
+}
+
+th.shrink {
+    max-width: 5px;
+}
+td.shrink {
+
+    max-width: 5px;
+}
