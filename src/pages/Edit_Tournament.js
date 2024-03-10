@@ -24,26 +24,27 @@ function Edit_Tournament() {
   }
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/tournamentschedule/${tournamentNumber}`)
-      .then((response) => {
-        setSchedule(response.data);
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching schedule:', error);
-      });
+    fetchTournamentSchedule();
+    fetchTournamentData();
   }, [tournamentNumber]);
 
-  useEffect(() => {
-    axios.get(`http://localhost:5000/tournament/${tournamentNumber}`)
-      .then((response) => {
-        setSchools(response.data.schools);
-        console.log(schools);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-      });
-  }, [tournamentNumber]);
+  const fetchTournamentSchedule = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/tournamentschedule/${tournamentNumber}`);
+      setSchedule(response.data);
+    } catch (error) {
+      console.error('Error fetching schedule:', error);
+    }
+  };
+
+  const fetchTournamentData = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/tournament/${tournamentNumber}`);
+      setSchools(response.data.schools);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
 
   useEffect(() => {
@@ -81,7 +82,7 @@ function Edit_Tournament() {
     setSelectedSchool(selectedSchoolID);
   }
 
-  function handleSubmit(e) {
+  const handleSubmit = async (e) => {
       // Prevent the browser from reloading the page
       e.preventDefault();
       // Read the form data
@@ -98,11 +99,22 @@ function Edit_Tournament() {
           return;
       }
       // fetch(`http://localhost:5000/updateschool/${selectedSchool}`, { method: form.method, body: formData });
-      toggleModal();
+      // toggleModal();
       // setSuccess(true);
-      fetch(`http://localhost:5000/updateschool/${selectedSchool}`, { method: form.method, body: formData }).then(
-        window.location.reload()
-      );
+
+      try {
+        await axios.post(`http://localhost:5000/updateschool/${selectedSchool}`, formData);
+        toggleModal();
+        fetchTournamentData();
+        fetchTournamentSchedule();
+      } catch (error) {
+        console.error('Error updating school:', error);
+      }
+
+      // fetch(`http://localhost:5000/updateschool/${selectedSchool}`, { method: form.method, body: formData }).then(
+      //   fetchTournamentData(),
+
+      // );
       
   }
 
@@ -150,8 +162,8 @@ function Edit_Tournament() {
     <Document title={pdfTitle}>
       {roundsData.map((round, roundIndex) => (
         <Page key={roundIndex} size="A4" style={styles.page}>
+          <Header roundNumber={roundIndex + 1} /> {/* Pass round number to the header */}
           <View style={styles.section}>
-            <Text style={styles.title}>{`Round ${roundIndex + 1}`}</Text>
             <View style={styles.table}>
               <View style={styles.tableRow}>
                 <Text style={styles.tableHeader}>Affirmative</Text>
@@ -173,6 +185,14 @@ function Edit_Tournament() {
       ))}
     </Document>
   );
+  
+
+  const Header = ({ roundNumber }) => (
+    <View style={styles.header}>
+      <Text style={styles.headerText}>Round {roundNumber}</Text>
+    </View>
+  );
+  
   
   const styles = {
     page: {
