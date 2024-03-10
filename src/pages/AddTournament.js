@@ -25,7 +25,7 @@ const AddTournament = () => {
 
   const fetchSchools = async () => {
     try {
-      const response = await axios.get('/schools');
+      const response = await axios.get('https://debate-app-backend.onrender.com/schools');
       setSchools(response.data);
     } catch (error) {
       console.error('Error fetching schools:', error);
