@@ -4,7 +4,6 @@ import Header from '../components/header';
 import axios from 'axios';
 
 function Leaderboard() {
-  // State to hold the updated rankings
   const [updatedSchoolRankings, setUpdatedSchoolRankings] = useState([]);
   const [updatedPartnershipRankings, setUpdatedPartnershipRankings] = useState([]);
 
@@ -13,11 +12,9 @@ function Leaderboard() {
     axios.post('https://api.rohanjoshi.dev/updateschoolranking', { rankings: updatedSchoolRankings })
       .then(response => {
         console.log(response.data);
-        // Handle success
       })
       .catch(error => {
         console.error('Error updating school rankings:', error);
-        // Handle error
       });
   };
 
@@ -26,11 +23,9 @@ function Leaderboard() {
     axios.post('https://api.rohanjoshi.dev/updatepartnershipranking', { rankings: updatedPartnershipRankings })
       .then(response => {
         console.log(response.data);
-        // Handle success
       })
       .catch(error => {
         console.error('Error updating partnership rankings:', error);
-        // Handle error
       });
   };
 
@@ -39,11 +34,6 @@ function Leaderboard() {
       <Header title="Leaderboard" mode="true"/>
 
       <div className="main">
-        {/* Your leaderboard sections */}
-        {/* Implement functionality to update updatedSchoolRankings and updatedPartnershipRankings arrays */}
-        {/* Implement UI to display and edit the rankings */}
-
-        {/* Update buttons */}
         <button onClick={updateSchoolRankings} className="update-btn">Update School Rankings</button>
         <button onClick={updatePartnershipRankings} className="update-btn">Update Partnership Rankings</button>
       </div>
