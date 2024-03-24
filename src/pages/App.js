@@ -13,6 +13,8 @@ import Settings from './Settings'
 import AddTournamentPage from './AddTournament';
 import AddSchool
  from './AddSchool';
+import ProtectedAdminRoute from '../auth/ProtectedAdminRoute';
+import ProtectedCoachRoute from '../auth/ProtectedCoachRoute';
 function App() {
   return (
     <div>
@@ -26,12 +28,21 @@ function App() {
           <Route element={<ProtectedRoute/>}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="leaderboard" element={<Leaderboard />} />
-            <Route path="edit_tournament" element={<Edit_Tournament />} />
-            <Route path="/edit-tournament/:tournamentNumber" element={<Edit_Tournament />} />
-            <Route path="/addtournament" element={<AddTournamentPage />} />
-            <Route path="settings" element={<Settings/>} />
-            <Route path="schoolsettings" element={<AddSchool/>} />
           </Route>
+
+          <Route element={<ProtectedCoachRoute/>}>
+            <Route path="edit_tournament" element={<Edit_Tournament />} />
+              <Route path="/edit-tournament/:tournamentNumber" element={<Edit_Tournament />} />
+              <Route path="/addtournament" element={<AddTournamentPage />} />
+          </Route>
+
+          <Route element={<ProtectedAdminRoute/>}>
+            <Route path="edit_tournament" element={<Edit_Tournament />} />
+              <Route path="settings" element={<Settings/>} />
+              <Route path="schoolsettings" element={<AddSchool/>} />
+          </Route>
+            
+         
 
 
         </Routes>
