@@ -90,7 +90,7 @@ const handleSubmitModal = async (e) => {
 
     const deleteSchool = async (name) => {
         try {
-        const response = await axios.post('http://127.0.0.1:5000/delete_school', { name });
+        const response = await axios.post('/delete_school', { name });
         fetchSchools();
         } catch (error) {
         console.error('Error deleting school:', error);

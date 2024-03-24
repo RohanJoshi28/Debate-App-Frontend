@@ -30,7 +30,7 @@ function Edit_Tournament() {
 
   const fetchTournamentSchedule = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/tournamentschedule/${tournamentNumber}`);
+      const response = await axios.get(`/tournamentschedule/${tournamentNumber}`);
       setSchedule(response.data);
     } catch (error) {
       console.error('Error fetching schedule:', error);
@@ -39,7 +39,7 @@ function Edit_Tournament() {
 
   const fetchTournamentData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/tournament/${tournamentNumber}`);
+      const response = await axios.get(`/tournament/${tournamentNumber}`);
       setSchools(response.data.schools);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -103,7 +103,7 @@ function Edit_Tournament() {
       // setSuccess(true);
 
       try {
-        await axios.post(`http://localhost:5000/updateschool/${selectedSchool}`, formData);
+        await axios.post(`/updateschool/${selectedSchool}`, formData);
         toggleModal();
         fetchTournamentData();
         fetchTournamentSchedule();

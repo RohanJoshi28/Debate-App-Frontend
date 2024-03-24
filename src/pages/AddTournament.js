@@ -25,7 +25,7 @@ const AddTournament = () => {
 
   const fetchSchools = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/schools');
+      const response = await axios.get('/schools');
       setSchools(response.data);
     } catch (error) {
       console.error('Error fetching schools:', error);
@@ -79,7 +79,7 @@ const AddTournament = () => {
     formData.append('pairs', pairs);
     formData.append('judges', judges);
     try {
-      await axios.post(`http://localhost:5000/updateschool/${selectedSchoolId}`, formData);
+      await axios.post(`/updateschool/${selectedSchoolId}`, formData);
       setShowModal(false);
       fetchSchools();
     } catch (error) {
