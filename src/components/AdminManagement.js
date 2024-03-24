@@ -3,23 +3,35 @@ import axios from 'axios';
 
 const Fetch = () => {
   const [userEmailToDelete, setDeleteEmail] = useState("");
-  const [admins, setAdmins] = useState([]); //these guys are admins for now
+  const [admins, setAdmins] = useState([]); 
   const [coaches, setCoaches] = useState([]);
+  const [users, setUsers] = useState([]);
   const [invalidDelete, setInvalidDelete] = useState(false);
   const [successDelete, setSuccessDelete] = useState(false);
   const [modal, setModal] = useState(false);
   const [coachModal, setCoachModal] = useState(false);
+  const [userModal, setUserModal] = useState(false);
   const [isSuccess, setSuccess] = useState(false);
   const [isCoachSuccess, setCoachSuccess] = useState(false);
+  const [isUserSuccess, setUserSuccess] = useState(false);
   useEffect(() => {
-    // fetchUsers();
+    fetchUsers();
     fetchAdmins();
     fetchCoaches();
   }, []);
 
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('/users');
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
   const fetchAdmins = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/admins');
+      const response = await axios.get('/admins');
       setAdmins(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -28,7 +40,7 @@ const Fetch = () => {
 
   const fetchCoaches = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/coaches');
+      const response = await axios.get('/coaches');
       setCoaches(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -55,13 +67,33 @@ const Fetch = () => {
     fetchCoaches();
   };
 
+  const toggleUserModal = () => {
+    setUserModal(!userModal);
+    if (!userModal) {
+      setUserSuccess(false);
+      setInvalidDelete(false);
+      setSuccessDelete(false);
+    }
+    fetchUsers();
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
 
+    if (userModal){
+      try {
+        await axios.post('/save_user_email', formData);
+        toggleUserModal();
+        setUserSuccess(true);
+      } catch (error) {
+        console.error('Error saving email:', error);
+      }
+    } 
     if (coachModal){
       try {
-        await axios.post('http://127.0.0.1:5000/save_coach_email', formData);
+        await axios.post('/save_coach_email', formData);
         toggleCoachModal();
         setCoachSuccess(true);
       } catch (error) {
@@ -71,7 +103,7 @@ const Fetch = () => {
 
     if (modal){
       try {
-        await axios.post('http://127.0.0.1:5000/save_admin_email', formData);
+        await axios.post('/save_admin_email', formData);
         toggleModal();
         setSuccess(true);
       } catch (error) {
@@ -81,20 +113,10 @@ const Fetch = () => {
     
   };
 
-  const handleCoachSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    try {
-      await axios.post('http://127.0.0.1:5000/save_coach_email', formData);
-      toggleCoachModal();
-      setCoachSuccess(true);
-    } catch (error) {
-      console.error('Error saving email:', error);
-    }
-  };
 
   const queryUserDelete = async (email) => {
     setSuccess(false);
+    setUserSuccess(false)
     setCoachSuccess(false)
     setInvalidDelete(false);
     setSuccessDelete(false);
@@ -125,9 +147,17 @@ const Fetch = () => {
 
   const deleteUser = async (email) => {
     try {
-      await axios.post('http://127.0.0.1:5000/deletecoach', { email });
+      await fetch('http://localhost:5000/deleteuser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+        credentials: 'include', // Include cookies in the request
+      });
       setSuccessDelete(true);
-      fetchCoaches(); // Fetch users after successful deletion
+      fetchCoaches();
+      fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
     }
@@ -181,9 +211,30 @@ const Fetch = () => {
           ))}
         </tbody>
       </table>
-
+      
+      <h2>Debaters (Whitelisted Emails)</h2>
+      <table className="settings-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user, index) => (
+            <tr key={index}>
+              <td>{user.name}</td>
+              <td>{user.email}</td>
+              <td>
+                <button onClick={() => queryUserDelete(user.email)}>X</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
       {successDelete && (
-        <p className="success">Successfully deleted coach: {userEmailToDelete}</p>
+        <p className="success">Successfully deleted user: {userEmailToDelete}</p>
       )}
 
       {invalidDelete && (
@@ -200,7 +251,7 @@ const Fetch = () => {
 
       <button onClick={toggleModal} className="btn-modal">Invite New Admins</button>
       <button onClick={toggleCoachModal} className="btn-modal">Invite New Coaches</button>
-
+      <button onClick={toggleUserModal} className="btn-modal">Invite New Debaters</button>
 
       {modal && (
         <div className="modal">
@@ -244,6 +295,31 @@ const Fetch = () => {
                   <button type="submit">Submit</button>
                 </form>
                   <button className='close-modal' onClick={toggleCoachModal}>Close</button>
+                </div>
+              </div>
+            )}
+      {userModal && (
+              <div className="modal">
+                <div className="overlay" onClick={toggleUserModal}></div>
+                <div className="modal-content">
+                  <h1>Invite Debater</h1>
+                            <form method="post" onSubmit={handleSubmit}>
+                  <h4>Note: You can add individual emails or whitelist an entire domain using the format: *@email.com</h4>    
+                  <h4>For example you can add johndoe@bergen.org</h4>     
+                  <h4>But to add all bergen.org users you can add *@bergen.org</h4>     
+                  <label>
+                  Name: <input name="name" />
+                </label>      
+                  <label>
+                    Email: <input name="email" type="email" /> 
+                  </label>
+                  <label>
+                    School: <input name="school"/> 
+                  </label>
+                  <hr />
+                  <button type="submit">Submit</button>
+                </form>
+                  <button className='close-modal' onClick={toggleUserModal}>Close</button>
                 </div>
               </div>
             )}
