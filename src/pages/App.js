@@ -15,6 +15,8 @@ import AddSchool
  from './AddSchool';
 import ProtectedAdminRoute from '../auth/ProtectedAdminRoute';
 import ProtectedCoachRoute from '../auth/ProtectedCoachRoute';
+import Tournaments from './Tournaments';
+import ViewTournamentSchedule from './ViewTournamentSchedule';
 function App() {
   return (
     <div>
@@ -26,11 +28,14 @@ function App() {
             <Route path="/" element={<Home />}/>
           {/* </Route> */}
           <Route element={<ProtectedRoute/>}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="leaderboard" element={<Leaderboard />} />
+          <Route path="leaderboard" element={<Leaderboard />} />
+            <Route path="viewtournaments" element={<Tournaments />} />
+            <Route path="/viewtournamentschedule/:tournamentNumber" element={<ViewTournamentSchedule />} />
           </Route>
 
           <Route element={<ProtectedCoachRoute/>}>
+          <Route path="dashboard" element={<Dashboard />} />
+            
             <Route path="edit_tournament" element={<Edit_Tournament />} />
               <Route path="/edit-tournament/:tournamentNumber" element={<Edit_Tournament />} />
               <Route path="/addtournament" element={<AddTournamentPage />} />

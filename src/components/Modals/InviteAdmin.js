@@ -22,7 +22,7 @@ export default function InviteAdmin() {
         const form = e.target;
         const formData = new FormData(form);
         // You can pass formData as a fetch body directly:
-        fetch('http://127.0.0.1:5000/save_email', { method: form.method, body: formData });
+        fetch('/save_email', { method: form.method, body: formData });
         toggleModal();
         setSuccess(true);
         window.location.reload();

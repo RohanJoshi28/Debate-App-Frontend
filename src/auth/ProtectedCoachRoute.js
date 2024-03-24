@@ -50,7 +50,7 @@ const ProtectedCoachRoute = () => {
           </div>
         )
       } else {
-        return <Navigate to="/dashboard" />
+        return <Navigate to="/viewtournaments" />
       }
       
     }
