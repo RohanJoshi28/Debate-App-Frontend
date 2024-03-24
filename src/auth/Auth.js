@@ -21,8 +21,9 @@ async function getUserInfo(codeResponse) {
 export default function Auth() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [failedLogin, setFailedLogin] = useState(false);
-  const { setAuth } = useAuth();
-
+  const { auth, setAuth } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isCoach, setIsCoach] = useState(false);
   const googleLogin = useGoogleLogin({
     flow: "auth-code",
     onSuccess: async (codeResponse) => {
@@ -31,6 +32,16 @@ export default function Auth() {
       if (loginDetails.user != null) {
         setLoggedIn(true);
         setAuth({ loggedin: true, role: loginDetails.role }); // Set role in context
+
+        console.log(loginDetails.role)
+        if (auth.role == "admin"){
+          setIsAdmin(true);
+        }
+
+        if (auth.role == "coach"){
+          setIsCoach(true);
+        }
+       
       } else {
         // User not authenticated
         setFailedLogin(true);
@@ -54,7 +65,7 @@ export default function Auth() {
         <button type="button" class="google-sign-in-button" onClick={() => googleLogin()}>
           Sign in with Google
         </button>
-        <p class="failed">Error: You are not a registered tournament administrator!</p>
+        <p class="failed">Error: You are not a registered user!</p>
       </>
     );
   } else if (!loggedIn && !failedLogin) {
@@ -66,6 +77,14 @@ export default function Auth() {
       </>
     );
   } else {
-    return <Navigate to="/dashboard" />;
+
+    if (auth.role == "admin" || auth.role == "coach"){
+      return <Navigate to="/dashboard" />;
+    } else {
+
+      return <Navigate to="/viewtournaments" />;
+    }
+    
+    
   }
 }
