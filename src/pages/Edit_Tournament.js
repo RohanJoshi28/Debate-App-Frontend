@@ -17,6 +17,8 @@ function Edit_Tournament() {
   const [showModal, setShowModal] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState(-1);
   const [invalidInput, setInvalidInput] = useState(false)
+  const [roomInputs, setRoomInputs] = useState('');
+  const [roomAssignments, setRoomAssignments] = useState({});
   let navigate = useNavigate();
 
   const routeChange = () => {
@@ -30,7 +32,7 @@ function Edit_Tournament() {
 
   const fetchTournamentSchedule = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/tournamentschedule/${tournamentNumber}`);
+      const response = await axios.get(`/tournamentschedule/${tournamentNumber}`);
       setSchedule(response.data);
     } catch (error) {
       console.error('Error fetching schedule:', error);
@@ -39,7 +41,7 @@ function Edit_Tournament() {
 
   const fetchTournamentData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/tournament/${tournamentNumber}`);
+      const response = await axios.get(`/tournament/${tournamentNumber}`);
       setSchools(response.data.schools);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -103,7 +105,7 @@ function Edit_Tournament() {
       // setSuccess(true);
 
       try {
-        await axios.post(`http://localhost:5000/updateschool/${selectedSchool}`, formData);
+        await axios.post(`/updateschool/${selectedSchool}`, formData);
         toggleModal();
         fetchTournamentData();
         fetchTournamentSchedule();
@@ -230,6 +232,39 @@ function Edit_Tournament() {
   };
 
 
+  const assignRooms = () => {
+    const roomsArray = roomInputs.split('\n').filter(Boolean); 
+    const newRoomAssignments = {};
+    const allMatches = roundsData.flat(); 
+    
+    allMatches.forEach((match, matchIndex) => {
+      const matchKey = `match${matchIndex}`;
+      newRoomAssignments[matchKey] = roomsArray[matchIndex] || 'N/A';
+    });
+  
+    setRoomAssignments(newRoomAssignments);
+  };
+  
+
+  
+  
+  
+  const updateRoomAssignment = (globalMatchIndex, newRoom) => {
+    const matchKey = `match${globalMatchIndex}`;
+    setRoomAssignments({ ...roomAssignments, [matchKey]: newRoom });
+  };
+  
+  
+
+  const handleRoomInputChange = (event) => {
+    setRoomInputs(event.target.value);
+  };
+  
+
+
+
+
+
   return (
     <div>
       <header className="edittournamentheader">
@@ -259,34 +294,49 @@ function Edit_Tournament() {
       </section>
 
 
-      <section className="schedule">
-      {roundsData.map((round, roundIndex) => (
-        <div key={roundIndex}>
-          <h2>Round {roundIndex + 1}</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Affirmative</th>
-                <th>Negative</th>
-                <th>Judge</th>
-                <th>Room</th>
-              </tr>
-            </thead>
-            <tbody>
-              {round.map((match, matchIndex) => (
-                <tr key={matchIndex}>
-                  <td>{match.affirmative}</td>
-                  <td>{match.negative}</td>
-                  <td>{match.judge}</td>
-                  <td>N/A</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
+      <textarea
+    value={roomInputs}
+    onChange={handleRoomInputChange}
+    placeholder="Enter room numbers, one per line"
+  ></textarea>
+  <button onClick={assignRooms}>Assign Rooms</button>
 
-    </section>
+  <section className="schedule">
+        {roundsData.map((round, roundIndex) => (
+          <div key={roundIndex}>
+            <h2>Round {roundIndex + 1}</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Affirmative</th>
+                  <th>Negative</th>
+                  <th>Judge</th>
+                  <th>Room</th>
+                </tr>
+              </thead>
+              <tbody>
+                {round.map((match, matchIndex) => {
+                  const globalMatchIndex = roundIndex * roundsData[0].length + matchIndex;
+                  const matchKey = `match${globalMatchIndex}`;                  return (
+                    <tr key={matchIndex}>
+                      <td>{match.affirmative}</td>
+                      <td>{match.negative}</td>
+                      <td>{match.judge}</td>
+                      <td>
+                        <input
+                          type="text"
+                          value={roomAssignments[matchKey] || ''}
+                          onChange={(e) => updateRoomAssignment(globalMatchIndex, e.target.value)}
+                          />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </section>
     
     {modal && (
             <div className="modal">
