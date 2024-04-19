@@ -98,13 +98,13 @@ const saveRoomAssignments = async () => {
         return { 
           affirmative: transformTeam(affirmative),
           negative: transformTeam(negative),
-          judge: transformJudge(judge) // Apply transformation to judge
+          judge: transformJudge(judge) 
         };
       });
     });
   
     setRoundsData(parsedRoundsData);
-  }, [schedule]);
+  }, [schedule, roomAssignments]); 
 
 
   //MODAL STUFF
@@ -192,7 +192,7 @@ const saveRoomAssignments = async () => {
     ReactDOM.render(
       <div style={{ height: '90vh' }}>
         <PDFViewer width="100%" height="100%">
-          <TablePdf roundsData={roundsData} />
+          <TablePdf roundsData={roundsData} roomAssignments={roomAssignments} />
         </PDFViewer>
       </div>,
       printWindow.document.body
@@ -200,12 +200,11 @@ const saveRoomAssignments = async () => {
     printWindow.document.write('</body></html>');
     printWindow.document.close();
   };
-
-  const TablePdf = ({ roundsData }) => (
+  const TablePdf = ({ roundsData, roomAssignments }) => (
     <Document title={pdfTitle}>
       {roundsData.map((round, roundIndex) => (
         <Page key={roundIndex} size="A4" style={styles.page}>
-          <Header roundNumber={roundIndex + 1} /> {/* Pass round number to the header */}
+          <Header roundNumber={roundIndex + 1} /> {}
           <View style={styles.section}>
             <View style={styles.table}>
               <View style={styles.tableRow}>
@@ -214,21 +213,26 @@ const saveRoomAssignments = async () => {
                 <Text style={styles.tableHeader}>Judge</Text>
                 <Text style={styles.tableHeader}>Room</Text>
               </View>
-              {round.map((match, matchIndex) => (
-                <View key={matchIndex} style={styles.tableRow}>
-                  <Text style={styles.tableCell}>{match.affirmative}</Text>
-                  <Text style={styles.tableCell}>{match.negative}</Text>
-                  <Text style={styles.tableCell}>{match.judge}</Text>
-                  <Text style={styles.tableCell}>N/A</Text>
-                </View>
-              ))}
+              {round.map((match, matchIndex) => {
+                const globalMatchIndex = roundIndex * round.length + matchIndex;
+                const matchKey = `match${globalMatchIndex}`;
+                return (
+                  <View key={matchIndex} style={styles.tableRow}>
+                    <Text style={styles.tableCell}>{match.affirmative}</Text>
+                    <Text style={styles.tableCell}>{match.negative}</Text>
+                    <Text style={styles.tableCell}>{match.judge}</Text>
+                    <Text style={styles.tableCell}>{roomAssignments[matchKey] || 'N/A'}</Text> {}
+                  </View>
+                );
+              })}
             </View>
           </View>
         </Page>
       ))}
     </Document>
   );
-  
+
+
 
   const Header = ({ roundNumber }) => (
     <View style={styles.header}>
