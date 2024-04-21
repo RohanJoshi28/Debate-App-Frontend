@@ -19,6 +19,8 @@ function Edit_Tournament() {
   const [invalidInput, setInvalidInput] = useState(false)
   const [roomInputs, setRoomInputs] = useState('');
   const [roomAssignments, setRoomAssignments] = useState({});
+  const [isRoomAssignmentLoading, setIsRoomAssignmentLoading] = useState(true);
+
   let navigate = useNavigate();
 
   const routeChange = () => {
@@ -26,9 +28,49 @@ function Edit_Tournament() {
   }
 
   useEffect(() => {
-    fetchTournamentSchedule();
-    fetchTournamentData();
+    const fetchData = async () => {
+      await fetchTournamentSchedule();
+      await fetchTournamentData();
+      await fetchRoomAssignments();
+    };
+    fetchData();
   }, [tournamentNumber]);
+  
+
+
+
+  const fetchRoomAssignments = async () => {
+    try {
+      setIsRoomAssignmentLoading(true);
+      const response = await axios.get(`/tournament/${tournamentNumber}/rooms`);
+      const fetchedRoomAssignments = {};
+      response.data.forEach(ra => {
+        fetchedRoomAssignments[ra.match_index] = ra.room_number;
+      });
+      setRoomAssignments(fetchedRoomAssignments);
+    } catch (error) {
+      console.error('Error fetching room assignments:', error);
+    } finally {
+      setIsRoomAssignmentLoading(false);
+    }
+};
+
+  
+  
+const saveRoomAssignments = async () => {
+  try {
+    const roomAssignmentsArray = Object.entries(roomAssignments).map(([index, room]) => {
+      return { match_index: index, room_number: room };
+    });
+    const response = await axios.post(`/tournament/${tournamentNumber}/rooms`, roomAssignmentsArray);
+    console.log(response.data.message); 
+
+  } catch (error) {
+    console.error('Error saving room assignments:', error);
+  }
+};
+
+  
 
   const fetchTournamentSchedule = async () => {
     try {
@@ -56,13 +98,13 @@ function Edit_Tournament() {
         return { 
           affirmative: transformTeam(affirmative),
           negative: transformTeam(negative),
-          judge: transformJudge(judge) // Apply transformation to judge
+          judge: transformJudge(judge) 
         };
       });
     });
   
     setRoundsData(parsedRoundsData);
-  }, [schedule]);
+  }, [schedule, roomAssignments]); 
 
 
   //MODAL STUFF
@@ -94,7 +136,6 @@ function Edit_Tournament() {
       const pairs = parseInt(formData.get('pairs')); // Parse input as integer
       const judges = parseInt(formData.get('judges')); // Parse input as integer
       
-      // Check if inputs are numerical
       if (isNaN(pairs) || isNaN(judges)) {
           toggleModal();
           setInvalidInput(true)
@@ -151,7 +192,7 @@ function Edit_Tournament() {
     ReactDOM.render(
       <div style={{ height: '90vh' }}>
         <PDFViewer width="100%" height="100%">
-          <TablePdf roundsData={roundsData} />
+          <TablePdf roundsData={roundsData} roomAssignments={roomAssignments} />
         </PDFViewer>
       </div>,
       printWindow.document.body
@@ -159,12 +200,11 @@ function Edit_Tournament() {
     printWindow.document.write('</body></html>');
     printWindow.document.close();
   };
-
-  const TablePdf = ({ roundsData }) => (
+  const TablePdf = ({ roundsData, roomAssignments }) => (
     <Document title={pdfTitle}>
       {roundsData.map((round, roundIndex) => (
         <Page key={roundIndex} size="A4" style={styles.page}>
-          <Header roundNumber={roundIndex + 1} /> {/* Pass round number to the header */}
+          <Header roundNumber={roundIndex + 1} /> {}
           <View style={styles.section}>
             <View style={styles.table}>
               <View style={styles.tableRow}>
@@ -173,21 +213,26 @@ function Edit_Tournament() {
                 <Text style={styles.tableHeader}>Judge</Text>
                 <Text style={styles.tableHeader}>Room</Text>
               </View>
-              {round.map((match, matchIndex) => (
-                <View key={matchIndex} style={styles.tableRow}>
-                  <Text style={styles.tableCell}>{match.affirmative}</Text>
-                  <Text style={styles.tableCell}>{match.negative}</Text>
-                  <Text style={styles.tableCell}>{match.judge}</Text>
-                  <Text style={styles.tableCell}>N/A</Text>
-                </View>
-              ))}
+              {round.map((match, matchIndex) => {
+                const globalMatchIndex = roundIndex * round.length + matchIndex;
+                const matchKey = `match${globalMatchIndex}`;
+                return (
+                  <View key={matchIndex} style={styles.tableRow}>
+                    <Text style={styles.tableCell}>{match.affirmative}</Text>
+                    <Text style={styles.tableCell}>{match.negative}</Text>
+                    <Text style={styles.tableCell}>{match.judge}</Text>
+                    <Text style={styles.tableCell}>{roomAssignments[matchKey] || 'N/A'}</Text> {}
+                  </View>
+                );
+              })}
             </View>
           </View>
         </Page>
       ))}
     </Document>
   );
-  
+
+
 
   const Header = ({ roundNumber }) => (
     <View style={styles.header}>
@@ -244,15 +289,30 @@ function Edit_Tournament() {
   
     setRoomAssignments(newRoomAssignments);
   };
+  useEffect(() => {
+    const saveChanges = async () => {
+      const roomAssignmentsNotEmpty = Object.values(roomAssignments).some(room => room !== '');
   
+      if (roomAssignmentsNotEmpty) {
+        await saveRoomAssignments();
+      }
+    };
+
+    saveChanges();
+  }, [roomAssignments]);
+
 
   
   
-  
-  const updateRoomAssignment = (globalMatchIndex, newRoom) => {
-    const matchKey = `match${globalMatchIndex}`;
-    setRoomAssignments({ ...roomAssignments, [matchKey]: newRoom });
+  const updateRoomAssignment = (matchKey, newRoom) => {
+    setRoomAssignments(prevAssignments => ({
+      ...prevAssignments,
+      [matchKey]: newRoom
+    }));
   };
+  
+  
+  
   
   
 
@@ -261,7 +321,11 @@ function Edit_Tournament() {
   };
   
 
-
+  const handleRoomSubmit = async (e) => {
+    e.preventDefault();
+    await saveRoomAssignments();
+  };
+  
 
 
 
@@ -297,11 +361,12 @@ function Edit_Tournament() {
       <textarea
     value={roomInputs}
     onChange={handleRoomInputChange}
-    placeholder="Enter room numbers, one per line"
+    placeholder="Enter room numbers, one number per line"
   ></textarea>
   <button onClick={assignRooms}>Assign Rooms</button>
 
   <section className="schedule">
+      <form onSubmit={handleRoomSubmit}>
         {roundsData.map((round, roundIndex) => (
           <div key={roundIndex}>
             <h2>Round {roundIndex + 1}</h2>
@@ -317,7 +382,8 @@ function Edit_Tournament() {
               <tbody>
                 {round.map((match, matchIndex) => {
                   const globalMatchIndex = roundIndex * roundsData[0].length + matchIndex;
-                  const matchKey = `match${globalMatchIndex}`;                  return (
+                  const matchKey = `match${globalMatchIndex}`;
+                  return (
                     <tr key={matchIndex}>
                       <td>{match.affirmative}</td>
                       <td>{match.negative}</td>
@@ -326,8 +392,9 @@ function Edit_Tournament() {
                         <input
                           type="text"
                           value={roomAssignments[matchKey] || ''}
-                          onChange={(e) => updateRoomAssignment(globalMatchIndex, e.target.value)}
-                          />
+                          onChange={(e) => updateRoomAssignment(matchKey, e.target.value)}
+                          onBlur={() => saveRoomAssignments()} 
+                        />
                       </td>
                     </tr>
                   );
@@ -336,7 +403,10 @@ function Edit_Tournament() {
             </table>
           </div>
         ))}
-      </section>
+        <button type="submit" style={{ display: "none" }}>Save Rooms</button>
+      </form>
+    </section>
+
     
     {modal && (
             <div className="modal">
