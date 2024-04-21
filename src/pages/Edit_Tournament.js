@@ -105,7 +105,7 @@ function Edit_Tournament() {
       // setSuccess(true);
 
       try {
-        await axios.post(`/updateschool/${selectedSchool}`, formData);
+        await axios.post(`/updateschool/${selectedSchool}`, formData, { withCredentials: true });
         toggleModal();
         fetchTournamentData();
         fetchTournamentSchedule();

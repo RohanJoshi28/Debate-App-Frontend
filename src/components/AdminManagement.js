@@ -158,6 +158,7 @@ const Fetch = () => {
       setSuccessDelete(true);
       fetchCoaches();
       fetchUsers();
+      fetchAdmins();
     } catch (error) {
       console.error('Error deleting user:', error);
     }
@@ -178,6 +179,7 @@ const Fetch = () => {
           <tr>
             <th>Name</th>
             <th>Email</th>
+            <th>Delete</th>
           </tr>
         </thead>
         <tbody>
@@ -185,6 +187,9 @@ const Fetch = () => {
             <tr key={index}>
               <td>{admin.name}</td>
               <td>{admin.email}</td>
+              <td>
+                <button onClick={() => queryUserDelete(admin.email)}>X</button>
+              </td>
             </tr>
           ))}
         </tbody>

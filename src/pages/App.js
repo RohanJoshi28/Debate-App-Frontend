@@ -31,7 +31,10 @@ function App() {
           <Route path="leaderboard" element={<Leaderboard />} />
             <Route path="viewtournaments" element={<Tournaments />} />
             <Route path="/viewtournamentschedule/:tournamentNumber" element={<ViewTournamentSchedule />} />
+            <Route path="schoolsettings" element={<AddSchool/>} />
           </Route>
+
+          
 
           <Route element={<ProtectedCoachRoute/>}>
           <Route path="dashboard" element={<Dashboard />} />
@@ -44,7 +47,7 @@ function App() {
           <Route element={<ProtectedAdminRoute/>}>
             <Route path="edit_tournament" element={<Edit_Tournament />} />
               <Route path="settings" element={<Settings/>} />
-              <Route path="schoolsettings" element={<AddSchool/>} />
+              
           </Route>
             
          

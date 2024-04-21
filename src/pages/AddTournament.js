@@ -80,6 +80,7 @@ const AddTournament = () => {
     formData.append('judges', judges);
     try {
       await axios.post(`/updateschool/${selectedSchoolId}`, formData);
+     
       setShowModal(false);
       fetchSchools();
     } catch (error) {

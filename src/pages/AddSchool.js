@@ -59,7 +59,20 @@ const handleSubmitModal = async (e) => {
     };
 
     try {
-      await axios.post('/add_school', formData);   
+      
+      // await axios.post('/add_school', formData); 
+      const response = await fetch("/add_school", {
+       method: "POST",
+        credentials: "include",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData), 
+      })
+
+  
+      await handleUpload(); 
       toggleModal();
       fetchSchools();
     } catch (error) {
@@ -76,8 +89,10 @@ const handleSubmitModal = async (e) => {
       num_judges: parseInt(numJudges),
     };
 
+    
     try {
-      await axios.post('/add_school', formData);   
+      await handleUpload(); 
+      await axios.post('/add_school', formData);  
       toggleModal();
       fetchSchools();
 
@@ -95,6 +110,28 @@ const handleSubmitModal = async (e) => {
         } catch (error) {
         console.error('Error deleting school:', error);
         }
+    };
+
+    const [file, setFile] = useState(null);
+
+    const handleFileChange = (e) => {
+      setFile(e.target.files[0]);
+    };
+  
+    const handleUpload = async () => {
+      const formData = new FormData();
+      formData.append('file', file);
+  
+      try {
+        const response = await axios.post('/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error uploading file: ', error);
+      }
     };
 
   return (
@@ -155,6 +192,10 @@ const handleSubmitModal = async (e) => {
                 <label>
                     Num Judges: <input type="number" value={numJudges} onChange={(e) => setNumJudges(e.target.value)} required />
                 </label>
+                <div>
+                  <h3>Upload school map: </h3>
+                  <input type="file" onChange={handleFileChange} />
+                </div>
                 <hr />
                 <button type="submit">Save</button>
                 </form>
