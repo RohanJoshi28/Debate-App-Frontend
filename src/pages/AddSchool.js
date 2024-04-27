@@ -12,6 +12,8 @@ const AddSchool = () => {
   const [numDebaters, setNumDebaters] = useState('');
   const [numJudges, setNumJudges] = useState('');
   const [invalidInput, setInvalidInput] = useState(false);
+  const [mapError, setMapError] = useState(false)
+
   let navigate = useNavigate();
   const routeChange = () => {
     navigate(`/dashboard`);
@@ -37,6 +39,7 @@ const AddSchool = () => {
         setName('');
         setNumDebaters('');
         setNumJudges('');
+        setMapError(false);
     }
 
     
@@ -52,27 +55,18 @@ const AddSchool = () => {
 const handleSubmitModal = async (e) => {
     e.preventDefault();
 
-    const formData = {
+    const schoolFormData = {
       name: name,
       num_debaters: parseInt(numDebaters),
       num_judges: parseInt(numJudges),
     };
 
+  
     try {
       
-      // await axios.post('/add_school', formData); 
-      const response = await fetch("/add_school", {
-       method: "POST",
-        credentials: "include",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData), 
-      })
-
-  
-      await handleUpload(); 
+      // await axios.post('/add_school', formData);
+      await handleUpload(schoolFormData); 
+      
       toggleModal();
       fetchSchools();
     } catch (error) {
@@ -92,7 +86,10 @@ const handleSubmitModal = async (e) => {
     
     try {
       await handleUpload(); 
-      await axios.post('/add_school', formData);  
+      if (!mapError){
+        await axios.post('/add_school', formData);  
+      }
+      
       toggleModal();
       fetchSchools();
 
@@ -118,10 +115,11 @@ const handleSubmitModal = async (e) => {
       setFile(e.target.files[0]);
     };
   
-    const handleUpload = async () => {
+    const handleUpload = async (schoolFormData) => {
       const formData = new FormData();
       formData.append('file', file);
-  
+      formData.append('school_name', name); // Append the 'name' variable
+    
       try {
         const response = await axios.post('/upload', formData, {
           headers: {
@@ -129,7 +127,18 @@ const handleSubmitModal = async (e) => {
           }
         });
         console.log(response.data);
+
+        const response1 = await fetch("/add_school", {
+          method: "POST",
+           credentials: "include",
+           mode: "cors",
+           headers: {
+             "Content-Type": "application/json",
+           },
+           body: JSON.stringify(schoolFormData), 
+         })
       } catch (error) {
+        setMapError(true)
         console.error('Error uploading file: ', error);
       }
     };
@@ -178,6 +187,10 @@ const handleSubmitModal = async (e) => {
             className="btn-modal">
                 Add New School
         </button>
+
+      {mapError && (
+                  <p class="fail">Error uploading map! Make sure to upload a valid file type: pdf, png, jpeg, jpg</p>
+              )}
       {showModal && (
         <div className="modal">
           <div className="modal-content">
