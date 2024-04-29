@@ -14,6 +14,8 @@ function ViewTournamentSchedule() {
   const [pdfTitle, setTitle] = useState("Schedule");
   const [schools, setSchools] = useState([]);
   const { tournamentNumber } = useParams();
+  const [hostSchool, setHostSchool] = useState("")
+  const [error, setError] = useState(false)
   let navigate = useNavigate();
 
   const routeChange = () => {
@@ -26,22 +28,61 @@ function ViewTournamentSchedule() {
   }, [tournamentNumber]);
 
   const fetchTournamentSchedule = async () => {
+
     try {
-      const response = await axios.get(`/tournamentschedule/${tournamentNumber}`);
-      setSchedule(response.data);
+      const response = await fetch(`http://localhost:5000/tournamentschedule/${tournamentNumber}`, {
+        method: "GET",
+        credentials: "include",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      const data = await response.json();
+      setSchedule(data);
     } catch (error) {
       console.error('Error fetching schedule:', error);
     }
+    
   };
 
   const fetchTournamentData = async () => {
     try {
-      const response = await axios.get(`/tournament/${tournamentNumber}`);
-      setSchools(response.data.schools);
+      const response = await fetch(`http://localhost:5000/tournament/${tournamentNumber}`, {
+        method: "GET",
+        credentials: "include",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      const data = await response.json();
+      setSchools(data.schools);
+      setHostSchool(data.host_school.name);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+
+  const viewMap = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/schoolmap/${hostSchool}`, {
+        responseType: 'blob', // Specify response type as blob (for binary data)
+      });
+  
+      const contentType = response.headers['content-type'];
+      const file = new Blob([response.data], { type: contentType });
+      const fileUrl = URL.createObjectURL(file);
+  
+      // Open the map in a new window
+      window.open(fileUrl);
+    } catch (error) {
+      console.error('Error fetching map:', error);
+      // Optionally provide user feedback (e.g., show an error message)
+      alert('Failed to load map. Please try again later.');
+    }
+  };
+  
 
 
   useEffect(() => {
@@ -200,6 +241,7 @@ function ViewTournamentSchedule() {
     
       <footer>
         <button onClick={handlePrint}>Download/Print Schedule</button>
+        <button onClick={viewMap}>View School Map</button>
       </footer>
     </div>
   );
