@@ -20,6 +20,7 @@ function Edit_Tournament() {
   const [roomInputs, setRoomInputs] = useState('');
   const [roomAssignments, setRoomAssignments] = useState({});
   const [isRoomAssignmentLoading, setIsRoomAssignmentLoading] = useState(true);
+  const [hostSchool, setHostSchool] = useState("")
 
   let navigate = useNavigate();
 
@@ -83,13 +84,43 @@ const saveRoomAssignments = async () => {
 
   const fetchTournamentData = async () => {
     try {
-      const response = await axios.get(`/tournament/${tournamentNumber}`);
-      setSchools(response.data.schools);
+      const response = await fetch(`http://localhost:5000/tournament/${tournamentNumber}`, {
+        method: "GET",
+        credentials: "include",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      const data = await response.json();
+      setSchools(data.schools);
+      setHostSchool(data.host_school.name);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
+  const viewMap = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/schoolmap/${hostSchool}`, {
+        responseType: 'blob', // Specify response type as blob (for binary data)
+      });
+  
+      const contentType = response.headers['content-type'];
+      const file = new Blob([response.data], { type: contentType });
+      const fileUrl = URL.createObjectURL(file);
+  
+      // Open the map in a new window
+      window.open(fileUrl);
+    } catch (error) {
+      console.error('Error fetching map:', error);
+      // Optionally provide user feedback (e.g., show an error message)
+      alert('Failed to load map. Please try again later.');
+    }
+  };
+
+
+  
 
   useEffect(() => {
     const parsedRoundsData = schedule.map(round => {
@@ -441,6 +472,7 @@ const saveRoomAssignments = async () => {
         <button>Generate New Schedule</button>
         <button>Manually Edit Schedule</button>
         <button onClick={handlePrint}>Download/Print Schedule</button>
+        <button onClick={viewMap}>View School Map</button>
       </footer>
     </div>
   );
