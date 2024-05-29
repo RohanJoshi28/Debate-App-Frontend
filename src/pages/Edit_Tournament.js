@@ -17,6 +17,11 @@ function Edit_Tournament() {
   const [showModal, setShowModal] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState(-1);
   const [invalidInput, setInvalidInput] = useState(false)
+  const [roomInputs, setRoomInputs] = useState('');
+  const [roomAssignments, setRoomAssignments] = useState({});
+  const [isRoomAssignmentLoading, setIsRoomAssignmentLoading] = useState(true);
+  const [hostSchool, setHostSchool] = useState("")
+
   let navigate = useNavigate();
 
   const routeChange = () => {
@@ -48,8 +53,7 @@ function Edit_Tournament() {
 
   const fetchTournamentData = async () => {
     try {
-    
-      const response = await fetch(`http://127.0.0.1:5000/tournament/${tournamentNumber}`, {
+      const response = await fetch(`http://localhost:5000/tournament/${tournamentNumber}`, {
         method: "GET",
         credentials: "include",
         mode: "cors",
@@ -57,13 +61,35 @@ function Edit_Tournament() {
           "Content-Type": "application/json",
         },
       })
-      const responseData = await response.json();
-      setSchools(responseData.schools);
+      const data = await response.json();
+      setSchools(data.schools);
+      setHostSchool(data.host_school.name);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
+  const viewMap = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/schoolmap/${hostSchool}`, {
+        responseType: 'blob', // Specify response type as blob (for binary data)
+      });
+  
+      const contentType = response.headers['content-type'];
+      const file = new Blob([response.data], { type: contentType });
+      const fileUrl = URL.createObjectURL(file);
+  
+      // Open the map in a new window
+      window.open(fileUrl);
+    } catch (error) {
+      console.error('Error fetching map:', error);
+      // Optionally provide user feedback (e.g., show an error message)
+      alert('Failed to load map. Please try again later.');
+    }
+  };
+
+
+  
 
   useEffect(() => {
     // Ensure schedule is an array before mapping
@@ -446,6 +472,7 @@ function Edit_Tournament() {
 
       <footer>
         <button onClick={handlePrint}>Download/Print Schedule</button>
+        <button onClick={viewMap}>View School Map</button>
       </footer>
     </div>
   );
