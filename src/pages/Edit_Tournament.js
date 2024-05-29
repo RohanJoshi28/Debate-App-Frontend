@@ -512,7 +512,7 @@ const saveRoomAssignments = async () => {
                         <input
                           type="text"
                           value={roomAssignments[`match${ matchIndex * roundsData[0].length + matchIndex}`] || ''}
-                          onChange={(e) => updateRoomAssignment(matchKey, e.target.value)}
+                          onChange={(e) => updateRoomAssignment(`match${ matchIndex * roundsData[0].length + matchIndex}`, e.target.value)}
                           onBlur={() => saveRoomAssignments()} 
                         />
                       </td> 
