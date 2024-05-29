@@ -36,7 +36,7 @@ function Edit_Tournament() {
   const fetchTournamentSchedule = async () => {
     try {
 
-      const response = await fetch(`http://127.0.0.1:5000/tournamentschedule/${tournamentNumber}`, {
+      const response = await fetch(`http://localhost:5000/tournamentschedule/${tournamentNumber}`, {
         method: "GET",
         credentials: "include",
         mode: "cors",
@@ -163,7 +163,7 @@ function Edit_Tournament() {
       // setSuccess(true);
 
       try {
-        const response = await fetch(`http://127.0.0.1:5000/updateschool/${selectedSchool}`, {
+        const response = await fetch(`http://localhost:5000/updateschool/${selectedSchool}`, {
           method: "POST",
           credentials: "include",
           mode: "cors",
@@ -334,7 +334,7 @@ function Edit_Tournament() {
     try {
       const response = await axios({
         method: 'post',
-        url: `http://127.0.0.1:5000/tournament/${tournamentNumber}/update_schedule`,
+        url: `http://localhost:5000/tournament/${tournamentNumber}/update_schedule`,
         data: JSON.stringify({ schedule: updatedSchedule }),
         withCredentials: true,
         mode: "cors",
