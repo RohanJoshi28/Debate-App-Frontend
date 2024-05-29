@@ -29,9 +29,42 @@ function Edit_Tournament() {
   }
 
   useEffect(() => {
-    fetchTournamentSchedule();
-    fetchTournamentData();
+    const fetchData = async () => {
+      await fetchTournamentSchedule();
+      await fetchTournamentData();
+      await fetchRoomAssignments();
+    };
+    fetchData();
   }, [tournamentNumber]);
+
+  const fetchRoomAssignments = async () => {
+    try {
+      setIsRoomAssignmentLoading(true);
+      const response = await axios.get(`/tournament/${tournamentNumber}/rooms`);
+      const fetchedRoomAssignments = {};
+      response.data.forEach(ra => {
+        fetchedRoomAssignments[ra.match_index] = ra.room_number;
+      });
+      setRoomAssignments(fetchedRoomAssignments);
+    } catch (error) {
+      console.error('Error fetching room assignments:', error);
+    } finally {
+      setIsRoomAssignmentLoading(false);
+    }
+};
+
+const saveRoomAssignments = async () => {
+  try {
+    const roomAssignmentsArray = Object.entries(roomAssignments).map(([index, room]) => {
+      return { match_index: index, room_number: room };
+    });
+    const response = await axios.post(`/tournament/${tournamentNumber}/rooms`, roomAssignmentsArray);
+    console.log(response.data.message); 
+
+  } catch (error) {
+    console.error('Error saving room assignments:', error);
+  }
+};
 
   const fetchTournamentSchedule = async () => {
     try {
@@ -120,7 +153,7 @@ function Edit_Tournament() {
     });
   
     setRoundsData(parsedRoundsData);
-  }, [schedule]);
+  }, [schedule, roomAssignments]);
 
 
   //MODAL STUFF
@@ -215,7 +248,7 @@ function Edit_Tournament() {
     ReactDOM.render(
       <div style={{ height: '90vh' }}>
         <PDFViewer width="100%" height="100%">
-          <TablePdf roundsData={roundsData} />
+          <TablePdf roundsData={roundsData} roomAssignments={roomAssignments}/>
         </PDFViewer>
       </div>,
       printWindow.document.body
@@ -224,7 +257,7 @@ function Edit_Tournament() {
     printWindow.document.close();
   };
 
-  const TablePdf = ({ roundsData }) => (
+  const TablePdf = ({ roundsData, roomAssignments }) => (
     <Document title={pdfTitle}>
       {roundsData.map((round, roundIndex) => (
         <Page key={roundIndex} size="A4" style={styles.page}>
@@ -237,14 +270,18 @@ function Edit_Tournament() {
                 <Text style={styles.tableHeader}>Judge</Text>
                 <Text style={styles.tableHeader}>Room</Text>
               </View>
-              {round.matches.map((match, matchIndex) => (
-                <View key={matchIndex} style={styles.tableRow}>
-                  <Text style={styles.tableCell}>{match.affirmative}</Text>
-                  <Text style={styles.tableCell}>{match.negative}</Text>
-                  <Text style={styles.tableCell}>{match.judge}</Text>
-                  <Text style={styles.tableCell}>N/A</Text>
-                </View>
-              ))}
+              {round.map((match, matchIndex) => {
+                const globalMatchIndex = roundIndex * round.length + matchIndex;
+                const matchKey = `match${globalMatchIndex}`;
+                return (
+                  <View key={matchIndex} style={styles.tableRow}>
+                    <Text style={styles.tableCell}>{match.affirmative}</Text>
+                    <Text style={styles.tableCell}>{match.negative}</Text>
+                    <Text style={styles.tableCell}>{match.judge}</Text>
+                    <Text style={styles.tableCell}>{roomAssignments[matchKey] || 'N/A'}</Text> {}
+                  </View>
+                );
+              })}
             </View>
           </View>
         </Page>
@@ -296,7 +333,46 @@ function Edit_Tournament() {
     },
   };
 
+  const assignRooms = () => {
+    const roomsArray = roomInputs.split('\n').filter(Boolean); 
+    const newRoomAssignments = {};
+    const allMatches = roundsData.flat(); 
 
+    allMatches.forEach((match, matchIndex) => {
+      const matchKey = `match${matchIndex}`;
+      newRoomAssignments[matchKey] = roomsArray[matchIndex] || 'N/A';
+    });
+
+    setRoomAssignments(newRoomAssignments);
+  };
+  useEffect(() => {
+    const saveChanges = async () => {
+      const roomAssignmentsNotEmpty = Object.values(roomAssignments).some(room => room !== '');
+
+      if (roomAssignmentsNotEmpty) {
+        await saveRoomAssignments();
+      }
+    };
+
+    saveChanges();
+  }, [roomAssignments]);
+
+  const updateRoomAssignment = (matchKey, newRoom) => {
+    setRoomAssignments(prevAssignments => ({
+      ...prevAssignments,
+      [matchKey]: newRoom
+    }));
+  };
+
+  const handleRoomInputChange = (event) => {
+    setRoomInputs(event.target.value);
+  };
+  
+
+  const handleRoomSubmit = async (e) => {
+    e.preventDefault();
+    await saveRoomAssignments();
+  };
 
 
   const handleDragStart = (e, cellData) => {
@@ -401,43 +477,53 @@ function Edit_Tournament() {
       </section>
 
       <section className="schedule">
-        {roundsData.map((round, roundIndex) => (
-          <div key={round.id}>
-            <h2>Round {roundIndex + 1}</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Affirmative</th>
-                  <th>Negative</th>
-                  <th>Judge</th>
-                  <th>Room</th> {/* Add other headers as needed */}
-                </tr>
-              </thead>
-              <tbody>
-                {Array.isArray(round.matches) ? round.matches.map((match, matchIndex) => (
-                  <tr key={match.id}>
-                    {Object.keys(match).map((cellType) => {
-                      if (cellType === 'id') return null; // Skip the id field
-                      const cellData = { id: match.id, roundId: round.id, matchIndex, cellType };
-                      return (
-                        <td
-                          key={`${match.id}-${cellType}`}
-                          draggable
-                          onDragStart={(e) => handleDragStart(e, cellData)}
-                          onDrop={(e) => handleDrop(e, cellData)}
-                          onDragOver={handleDragOver}
-                        >
-                          {match[cellType]}
-                        </td>
-                      );
-                    })}
-                    <td>N/A</td> {/* This is for the Room column */}
+        <form onSubmit={handleRoomSubmit}>
+          {roundsData.map((round, roundIndex) => (
+            <div key={round.id}>
+              <h2>Round {roundIndex + 1}</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Affirmative</th>
+                    <th>Negative</th>
+                    <th>Judge</th>
+                    <th>Room</th> {/* Add other headers as needed */}
                   </tr>
-                )) : <tr><td colSpan="4">No matches for this round.</td></tr>}
-              </tbody>
-            </table>
-          </div>
-        ))}
+                </thead>
+                <tbody>
+                  {Array.isArray(round.matches) ? round.matches.map((match, matchIndex) => (
+                    <tr key={match.id}>
+                      {Object.keys(match).map((cellType) => {
+                        if (cellType === 'id') return null; // Skip the id field
+                        const cellData = { id: match.id, roundId: round.id, matchIndex, cellType };
+                        return (
+                          <td
+                            key={`${match.id}-${cellType}`}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, cellData)}
+                            onDrop={(e) => handleDrop(e, cellData)}
+                            onDragOver={handleDragOver}
+                          >
+                            {match[cellType]}
+                          </td>
+                        );
+                      })}
+                      <td>
+                        <input
+                          type="text"
+                          value={roomAssignments[`match${ matchIndex * roundsData[0].length + matchIndex}`] || ''}
+                          onChange={(e) => updateRoomAssignment(matchKey, e.target.value)}
+                          onBlur={() => saveRoomAssignments()} 
+                        />
+                      </td> 
+                    </tr>
+                  )) : <tr><td colSpan="4">No matches for this round.</td></tr>}
+                </tbody>
+              </table>
+            </div>
+          ))}
+          <button type="submit" style={{ display: "none" }}>Save Rooms</button>
+        </form>
       </section>
 
     
@@ -471,6 +557,8 @@ function Edit_Tournament() {
 
 
       <footer>
+        <button>Generate New Schedule</button>
+        <button>Manually Edit Schedule</button>
         <button onClick={handlePrint}>Download/Print Schedule</button>
         <button onClick={viewMap}>View School Map</button>
       </footer>
