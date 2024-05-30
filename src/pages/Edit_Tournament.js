@@ -476,6 +476,14 @@ const saveRoomAssignments = async () => {
      
       </section>
 
+
+      <textarea
+      value={roomInputs}
+      onChange={handleRoomInputChange}
+      placeholder="Enter room numbers, one number per line"
+    ></textarea>
+    
+  <button onClick={assignRooms}>Assign Rooms</button>
       <section className="schedule">
         <form onSubmit={handleRoomSubmit}>
           {roundsData.map((round, roundIndex) => (
