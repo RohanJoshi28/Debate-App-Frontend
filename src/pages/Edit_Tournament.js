@@ -7,7 +7,6 @@ import ReactDOM from 'react-dom';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
-
 function Edit_Tournament() {
   const [schedule, setSchedule] = useState([]);
   const [roundsData, setRoundsData] = useState([]);
@@ -18,6 +17,7 @@ function Edit_Tournament() {
   const [selectedSchool, setSelectedSchool] = useState(-1);
   const [invalidInput, setInvalidInput] = useState(false)
   const [roomInputs, setRoomInputs] = useState('');
+  const [scoreInputs, setScoreInputs] = useState('');
   const [roomAssignments, setRoomAssignments] = useState({});
   const [isRoomAssignmentLoading, setIsRoomAssignmentLoading] = useState(true);
   const [hostSchool, setHostSchool] = useState("")
@@ -40,9 +40,19 @@ function Edit_Tournament() {
   const fetchRoomAssignments = async () => {
     try {
       setIsRoomAssignmentLoading(true);
-      const response = await axios.get(`/tournament/${tournamentNumber}/rooms`);
+      const response = await fetch(`http://localhost:5000/tournament/${tournamentNumber}/rooms`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
       const fetchedRoomAssignments = {};
-      response.data.forEach(ra => {
+      data.forEach(ra => {
         fetchedRoomAssignments[ra.match_index] = ra.room_number;
       });
       setRoomAssignments(fetchedRoomAssignments);
@@ -51,20 +61,37 @@ function Edit_Tournament() {
     } finally {
       setIsRoomAssignmentLoading(false);
     }
-};
+  };
+  
 
 const saveRoomAssignments = async () => {
   try {
     const roomAssignmentsArray = Object.entries(roomAssignments).map(([index, room]) => {
       return { match_index: index, room_number: room };
     });
-    const response = await axios.post(`/tournament/${tournamentNumber}/rooms`, roomAssignmentsArray);
-    console.log(response.data.message); 
+
+    const response = await fetch(`/tournament/${tournamentNumber}/rooms`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(roomAssignmentsArray)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(data.message); 
 
   } catch (error) {
     console.error('Error saving room assignments:', error);
   }
 };
+
+
+
 
   const fetchTournamentSchedule = async () => {
     try {
@@ -121,21 +148,16 @@ const saveRoomAssignments = async () => {
     }
   };
 
-
-  
-
   useEffect(() => {
-    // Ensure schedule is an array before mapping
     if (!Array.isArray(schedule)) {
       console.error('schedule is not an array:', schedule);
       return;
     }
   
     const parsedRoundsData = schedule.map((round, roundIndex) => {
-      // Check if round is an array before mapping
       if (!Array.isArray(round)) {
         console.error('round is not an array:', round);
-        return { id: roundIndex, matches: [] }; // Return an object with an empty matches array
+        return { id: roundIndex, matches: [] };
       }
   
       return {
@@ -143,7 +165,7 @@ const saveRoomAssignments = async () => {
         matches: round.map((entry, matchIndex) => {
           const [affirmative, negative, judge] = entry.split('|');
           return { 
-            id: `${roundIndex}-${matchIndex}`, // Generate a unique ID for each match
+            id: `${roundIndex}-${matchIndex}`,
             affirmative: transformTeam(affirmative),
             negative: transformTeam(negative),
             judge: transformJudge(judge)
@@ -155,8 +177,6 @@ const saveRoomAssignments = async () => {
     setRoundsData(parsedRoundsData);
   }, [schedule, roomAssignments]);
 
-
-  //MODAL STUFF
   const [modal, setModal] = useState(false);
   const [isSuccess, setSuccess] = useState(false);
   
@@ -166,8 +186,6 @@ const saveRoomAssignments = async () => {
           setInvalidInput(false);
       }
       setModal(!modal);
-      
-      
   }
 
   function editButton(selectedSchoolID) {
@@ -176,24 +194,18 @@ const saveRoomAssignments = async () => {
   }
 
   const handleSubmit = async (e) => {
-      // Prevent the browser from reloading the page
       e.preventDefault();
-      // Read the form data
       const form = e.target;
       const formData = new FormData(form);
 
-      const pairs = parseInt(formData.get('pairs')); // Parse input as integer
-      const judges = parseInt(formData.get('judges')); // Parse input as integer
+      const pairs = parseInt(formData.get('pairs'));
+      const judges = parseInt(formData.get('judges'));
       
-      // Check if inputs are numerical
       if (isNaN(pairs) || isNaN(judges)) {
           toggleModal();
           setInvalidInput(true)
           return;
       }
-      // fetch(`http://localhost:5000/updateschool/${selectedSchool}`, { method: form.method, body: formData });
-      // toggleModal();
-      // setSuccess(true);
 
       try {
         const response = await fetch(`http://localhost:5000/updateschool/${selectedSchool}`, {
@@ -202,30 +214,19 @@ const saveRoomAssignments = async () => {
           mode: "cors",
           body: formData
         })
-        // await axios.post(`/updateschool/${selectedSchool}`, formData);
         toggleModal();
         fetchTournamentData();
         fetchTournamentSchedule();
       } catch (error) {
         console.error('Error updating school:', error);
       }
-
-      // fetch(`http://localhost:5000/updateschool/${selectedSchool}`, { method: form.method, body: formData }).then(
-      //   fetchTournamentData(),
-
-      // );
-      
   }
 
   if (modal){
       document.body.classList.add('active-modal')
   } else {
       document.body.classList.remove('active-modal')
-      
   }
-
-  
-
 
   const transformTeam = (team) => {
     const [first, second] = team.split('~');
@@ -235,9 +236,9 @@ const saveRoomAssignments = async () => {
   };
 
   const transformJudge = (judge) => {
-    const letter = judge.charAt(0); // Get the first character (the letter 'J')
-    const number = judge.substring(1).split('~')[0]; // Get the number after 'J' and before '~'
-    const incrementedSecond = parseInt(judge.substring(3)) + 1; // Get the second number and increment it
+    const letter = judge.charAt(0);
+    const number = judge.substring(1).split('~')[0];
+    const incrementedSecond = parseInt(judge.substring(3)) + 1;
     const alphabetizedNumber = String.fromCharCode(65 + parseInt(number));
     return `${alphabetizedNumber}${letter}${incrementedSecond}`;
   };
@@ -261,7 +262,7 @@ const saveRoomAssignments = async () => {
     <Document title={pdfTitle}>
       {roundsData.map((round, roundIndex) => (
         <Page key={roundIndex} size="A4" style={styles.page}>
-          <Header roundNumber={roundIndex + 1} /> {}
+          <Header roundNumber={roundIndex + 1} />
           <View style={styles.section}>
             <View style={styles.table}>
               <View style={styles.tableRow}>
@@ -270,15 +271,14 @@ const saveRoomAssignments = async () => {
                 <Text style={styles.tableHeader}>Judge</Text>
                 <Text style={styles.tableHeader}>Room</Text>
               </View>
-              {round.map((match, matchIndex) => {
-                const globalMatchIndex = roundIndex * round.length + matchIndex;
-                const matchKey = `match${globalMatchIndex}`;
+              {round.matches.map((match, matchIndex) => {
+                const matchKey = `match${round.id * 10 + matchIndex}`;
                 return (
                   <View key={matchIndex} style={styles.tableRow}>
                     <Text style={styles.tableCell}>{match.affirmative}</Text>
                     <Text style={styles.tableCell}>{match.negative}</Text>
                     <Text style={styles.tableCell}>{match.judge}</Text>
-                    <Text style={styles.tableCell}>{roomAssignments[matchKey] || 'N/A'}</Text> {}
+                    <Text style={styles.tableCell}>{roomAssignments[matchKey] || 'N/A'}</Text>
                   </View>
                 );
               })}
@@ -290,13 +290,13 @@ const saveRoomAssignments = async () => {
   );
   
   
-
+  
+  
   const Header = ({ roundNumber }) => (
     <View style={styles.header}>
       <Text style={styles.headerText}>Round {roundNumber}</Text>
     </View>
   );
-  
   
   const styles = {
     page: {
@@ -334,17 +334,25 @@ const saveRoomAssignments = async () => {
   };
 
   const assignRooms = () => {
-    const roomsArray = roomInputs.split('\n').filter(Boolean); 
+    const roomsArray = roomInputs.split('\n').filter(Boolean);
     const newRoomAssignments = {};
-    const allMatches = roundsData.flat(); 
-
-    allMatches.forEach((match, matchIndex) => {
-      const matchKey = `match${matchIndex}`;
-      newRoomAssignments[matchKey] = roomsArray[matchIndex] || 'N/A';
+    let roomIndex = 0;
+  
+    roundsData.forEach((round, roundIndex) => {
+      round.matches.forEach((match, matchIndex) => {
+        const matchKey = `match${roundIndex * 10 + matchIndex}`;
+        newRoomAssignments[matchKey] = roomsArray[roomIndex] || '';
+        roomIndex++;
+      });
     });
-
+  
     setRoomAssignments(newRoomAssignments);
   };
+  
+  
+  
+  
+
   useEffect(() => {
     const saveChanges = async () => {
       const roomAssignmentsNotEmpty = Object.values(roomAssignments).some(room => room !== '');
@@ -367,24 +375,34 @@ const saveRoomAssignments = async () => {
   const handleRoomInputChange = (event) => {
     setRoomInputs(event.target.value);
   };
-  
+
+  const handleScoreInputChange = (event) => {
+    setScoreInputs(event.target.value);
+  };
 
   const handleRoomSubmit = async (e) => {
     e.preventDefault();
     await saveRoomAssignments();
   };
 
-
   const handleDragStart = (e, cellData) => {
     e.dataTransfer.setData('text/plain', JSON.stringify(cellData));
   };
 
-  // Function to handle the drop event on a cell
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
   const handleDrop = async (e, targetCellData) => {
+    if (targetCellData.cellType == "room") {
+      e.preventDefault()
+      return
+    }
     e.preventDefault();
     const sourceCellData = await JSON.parse(e.dataTransfer.getData('text'));
-  
+
     if (sourceCellData.id === targetCellData.id) return;
+    
     const changeRoundsData = (prevRoundsData) => {
       const newRoundsData = JSON.parse(JSON.stringify(prevRoundsData));
       const sourceRound = newRoundsData.findIndex(round => round.id === sourceCellData.roundId);
@@ -396,7 +414,7 @@ const saveRoomAssignments = async () => {
       return newRoundsData;
     };
 
-    const newRoundsData = await changeRoundsData(roundsData)
+    const newRoundsData = await changeRoundsData(roundsData);
   
     const updatedSchedule = newRoundsData.map(round =>
       round.matches.map(match => ({
@@ -405,7 +423,7 @@ const saveRoomAssignments = async () => {
         judge: match.judge
       }))
     );
-    console.log(updatedSchedule)
+    console.log(updatedSchedule);
   
     try {
       const response = await axios({
@@ -421,7 +439,7 @@ const saveRoomAssignments = async () => {
   
       if (response.status === 200) {
         console.log('Schedule updated successfully');
-        fetchTournamentSchedule(); // Re-fetch the updated schedule
+        fetchTournamentSchedule();
       } else {
         console.error('Failed to update schedule:', response);
       }
@@ -429,24 +447,35 @@ const saveRoomAssignments = async () => {
       console.error('Error updating schedule:', error);
     }
   };
-  
 
-  // Function to prevent the default handling of the dragover event to allow dropping
-  const handleDragOver = (e) => {
+  const preventDragHandler = (e) => {
     e.preventDefault();
+  }
+
+  const handleScoreSubmit = async () => {
+    try {
+      const scoresList = scoreInputs.split('\n').filter(Boolean);
+  
+      const scoresString = scoresList.join(',');
+  
+      const response = await fetch(`/varsitytournamentschedule/${tournamentNumber}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ previous_wins: scoresString }),
+      });
+  
+      if (response.ok) {
+        console.log('Scores submitted successfully');
+        setScoreInputs('');
+      } else {
+        console.error('Failed to submit scores');
+      }
+    } catch (error) {
+      console.error('Error submitting scores:', error);
+    }
   };
-
-
-
-
-
-
-
-
-
-
-
-
 
   return (
     <div>
@@ -456,12 +485,12 @@ const saveRoomAssignments = async () => {
       </header>
 
       {invalidInput && (
-                  <p class="fail">Please enter in a valid integer!</p>
-              )}
+        <p class="fail">Please enter in a valid integer!</p>
+      )}
 
       {isSuccess && (
-                        <p class="success">Successfully edited school!</p>
-                    )}
+        <p class="success">Successfully edited school!</p>
+      )}
         
       <section className="schools">
         {schools.map((school, index) => (
@@ -471,9 +500,7 @@ const saveRoomAssignments = async () => {
             <p>Judges: {school.num_judges}</p>
             <button onClick={() => editButton(school.id)}>Edit</button>
           </div>
-          
         ))}
-     
       </section>
 
 
@@ -495,14 +522,14 @@ const saveRoomAssignments = async () => {
                     <th>Affirmative</th>
                     <th>Negative</th>
                     <th>Judge</th>
-                    <th>Room</th> {/* Add other headers as needed */}
+                    <th>Room</th>
                   </tr>
                 </thead>
                 <tbody>
                   {Array.isArray(round.matches) ? round.matches.map((match, matchIndex) => (
                     <tr key={match.id}>
                       {Object.keys(match).map((cellType) => {
-                        if (cellType === 'id') return null; // Skip the id field
+                        if (cellType === 'id') return null;
                         const cellData = { id: match.id, roundId: round.id, matchIndex, cellType };
                         return (
                           <td
@@ -519,9 +546,11 @@ const saveRoomAssignments = async () => {
                       <td>
                         <input
                           type="text"
-                          value={roomAssignments[`match${ matchIndex * roundsData[0].length + matchIndex}`] || ''}
-                          onChange={(e) => updateRoomAssignment(`match${ matchIndex * roundsData[0].length + matchIndex}`, e.target.value)}
-                          onBlur={() => saveRoomAssignments()} 
+                          draggable={false}
+                          onDragStart={(e) => preventDragHandler(e)}
+                          value={roomAssignments[`match${round.id * 10 + matchIndex}`] || ''}
+                          onChange={(e) => updateRoomAssignment(`match${round.id * 10 + matchIndex}`, e.target.value)}
+                          onBlur={() => saveRoomAssignments()}
                         />
                       </td> 
                     </tr>
@@ -533,36 +562,34 @@ const saveRoomAssignments = async () => {
           <button type="submit" style={{ display: "none" }}>Save Rooms</button>
         </form>
       </section>
-
     
-    {modal && (
-            <div className="modal">
-            <div onClick={toggleModal} className="overlay"></div>
-            <div className="modal-content">
-                <h1>Edit School</h1>
-                <form method="post" onSubmit={handleSubmit}>
-            <label>
+      {modal && (
+        <div className="modal">
+          <div onClick={toggleModal} className="overlay"></div>
+          <div className="modal-content">
+            <h1>Edit School</h1>
+            <form method="post" onSubmit={handleSubmit}>
+              <label>
                 Num Pairs: <input name="pairs" />
-            </label>
-            
-            <p></p>
-            <label>
+              </label>
+              <p></p>
+              <label>
                 Num Judges: <input name="judges" />
-            </label>
-            
-            <hr />
-            <button type="submit">Save</button>
+              </label>
+              <hr />
+              <button type="submit">Save</button>
             </form>
-            <button
-                className='close-modal'
-                onClick={toggleModal}>
-                Close
-            </button>
-            </div>
-
+            <button className='close-modal' onClick={toggleModal}>Close</button>
+          </div>
         </div>
-        )}
+      )}
 
+<textarea
+      value={scoreInputs}
+      onChange={handleScoreInputChange}
+      placeholder="Enter number of wins for each team (A1, A2.. B1, B2, etc...) one per line"
+    ></textarea>
+    <button onClick={handleScoreSubmit}>Submit</button>
 
       <footer>
         <button>Generate New Schedule</button>
@@ -572,8 +599,6 @@ const saveRoomAssignments = async () => {
       </footer>
     </div>
   );
-};
-
-
+}
 
 export default Edit_Tournament;
