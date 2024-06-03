@@ -36,9 +36,6 @@ function Edit_Tournament() {
     };
     fetchData();
   }, [tournamentNumber]);
-  
-
-
 
   const fetchRoomAssignments = async () => {
     try {
@@ -56,8 +53,6 @@ function Edit_Tournament() {
     }
 };
 
-  
-  
 const saveRoomAssignments = async () => {
   try {
     const roomAssignmentsArray = Object.entries(roomAssignments).map(([index, room]) => {
@@ -71,12 +66,19 @@ const saveRoomAssignments = async () => {
   }
 };
 
-  
-
   const fetchTournamentSchedule = async () => {
     try {
-      const response = await axios.get(`/tournamentschedule/${tournamentNumber}`);
-      setSchedule(response.data);
+
+      const response = await fetch(`http://localhost:5000/tournamentschedule/${tournamentNumber}`, {
+        method: "GET",
+        credentials: "include",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      const data = await response.json();
+      setSchedule(data);
     } catch (error) {
       console.error('Error fetching schedule:', error);
     }
@@ -123,19 +125,35 @@ const saveRoomAssignments = async () => {
   
 
   useEffect(() => {
-    const parsedRoundsData = schedule.map(round => {
-      return round.map(entry => {
-        const [affirmative, negative, judge] = entry.split('|');
-        return { 
-          affirmative: transformTeam(affirmative),
-          negative: transformTeam(negative),
-          judge: transformJudge(judge) 
-        };
-      });
+    // Ensure schedule is an array before mapping
+    if (!Array.isArray(schedule)) {
+      console.error('schedule is not an array:', schedule);
+      return;
+    }
+  
+    const parsedRoundsData = schedule.map((round, roundIndex) => {
+      // Check if round is an array before mapping
+      if (!Array.isArray(round)) {
+        console.error('round is not an array:', round);
+        return { id: roundIndex, matches: [] }; // Return an object with an empty matches array
+      }
+  
+      return {
+        id: roundIndex,
+        matches: round.map((entry, matchIndex) => {
+          const [affirmative, negative, judge] = entry.split('|');
+          return { 
+            id: `${roundIndex}-${matchIndex}`, // Generate a unique ID for each match
+            affirmative: transformTeam(affirmative),
+            negative: transformTeam(negative),
+            judge: transformJudge(judge)
+          };
+        })
+      };
     });
   
     setRoundsData(parsedRoundsData);
-  }, [schedule, roomAssignments]); 
+  }, [schedule, roomAssignments]);
 
 
   //MODAL STUFF
@@ -167,6 +185,7 @@ const saveRoomAssignments = async () => {
       const pairs = parseInt(formData.get('pairs')); // Parse input as integer
       const judges = parseInt(formData.get('judges')); // Parse input as integer
       
+      // Check if inputs are numerical
       if (isNaN(pairs) || isNaN(judges)) {
           toggleModal();
           setInvalidInput(true)
@@ -177,7 +196,13 @@ const saveRoomAssignments = async () => {
       // setSuccess(true);
 
       try {
-        await axios.post(`/updateschool/${selectedSchool}`, formData, { withCredentials: true });
+        const response = await fetch(`http://localhost:5000/updateschool/${selectedSchool}`, {
+          method: "POST",
+          credentials: "include",
+          mode: "cors",
+          body: formData
+        })
+        // await axios.post(`/updateschool/${selectedSchool}`, formData);
         toggleModal();
         fetchTournamentData();
         fetchTournamentSchedule();
@@ -223,7 +248,7 @@ const saveRoomAssignments = async () => {
     ReactDOM.render(
       <div style={{ height: '90vh' }}>
         <PDFViewer width="100%" height="100%">
-          <TablePdf roundsData={roundsData} roomAssignments={roomAssignments} />
+          <TablePdf roundsData={roundsData} roomAssignments={roomAssignments}/>
         </PDFViewer>
       </div>,
       printWindow.document.body
@@ -231,6 +256,7 @@ const saveRoomAssignments = async () => {
     printWindow.document.write('</body></html>');
     printWindow.document.close();
   };
+
   const TablePdf = ({ roundsData, roomAssignments }) => (
     <Document title={pdfTitle}>
       {roundsData.map((round, roundIndex) => (
@@ -262,8 +288,8 @@ const saveRoomAssignments = async () => {
       ))}
     </Document>
   );
-
-
+  
+  
 
   const Header = ({ roundNumber }) => (
     <View style={styles.header}>
@@ -307,23 +333,22 @@ const saveRoomAssignments = async () => {
     },
   };
 
-
   const assignRooms = () => {
     const roomsArray = roomInputs.split('\n').filter(Boolean); 
     const newRoomAssignments = {};
     const allMatches = roundsData.flat(); 
-    
+
     allMatches.forEach((match, matchIndex) => {
       const matchKey = `match${matchIndex}`;
       newRoomAssignments[matchKey] = roomsArray[matchIndex] || 'N/A';
     });
-  
+
     setRoomAssignments(newRoomAssignments);
   };
   useEffect(() => {
     const saveChanges = async () => {
       const roomAssignmentsNotEmpty = Object.values(roomAssignments).some(room => room !== '');
-  
+
       if (roomAssignmentsNotEmpty) {
         await saveRoomAssignments();
       }
@@ -332,20 +357,12 @@ const saveRoomAssignments = async () => {
     saveChanges();
   }, [roomAssignments]);
 
-
-  
-  
   const updateRoomAssignment = (matchKey, newRoom) => {
     setRoomAssignments(prevAssignments => ({
       ...prevAssignments,
       [matchKey]: newRoom
     }));
   };
-  
-  
-  
-  
-  
 
   const handleRoomInputChange = (event) => {
     setRoomInputs(event.target.value);
@@ -356,7 +373,78 @@ const saveRoomAssignments = async () => {
     e.preventDefault();
     await saveRoomAssignments();
   };
+
+
+  const handleDragStart = (e, cellData) => {
+    e.dataTransfer.setData('text/plain', JSON.stringify(cellData));
+  };
+
+  // Function to handle the drop event on a cell
+  const handleDrop = async (e, targetCellData) => {
+    e.preventDefault();
+    const sourceCellData = await JSON.parse(e.dataTransfer.getData('text'));
   
+    if (sourceCellData.id === targetCellData.id) return;
+    const changeRoundsData = (prevRoundsData) => {
+      const newRoundsData = JSON.parse(JSON.stringify(prevRoundsData));
+      const sourceRound = newRoundsData.findIndex(round => round.id === sourceCellData.roundId);
+      const targetRound = newRoundsData.findIndex(round => round.id === targetCellData.roundId);
+      const sourceCell = newRoundsData[sourceRound].matches[sourceCellData.matchIndex][sourceCellData.cellType];
+      const targetCell = newRoundsData[targetRound].matches[targetCellData.matchIndex][targetCellData.cellType];
+      newRoundsData[sourceRound].matches[sourceCellData.matchIndex][sourceCellData.cellType] = targetCell;
+      newRoundsData[targetRound].matches[targetCellData.matchIndex][targetCellData.cellType] = sourceCell;
+      return newRoundsData;
+    };
+
+    const newRoundsData = await changeRoundsData(roundsData)
+  
+    const updatedSchedule = newRoundsData.map(round =>
+      round.matches.map(match => ({
+        affirmative: match.affirmative,
+        negative: match.negative,
+        judge: match.judge
+      }))
+    );
+    console.log(updatedSchedule)
+  
+    try {
+      const response = await axios({
+        method: 'post',
+        url: `http://localhost:5000/tournament/${tournamentNumber}/update_schedule`,
+        data: JSON.stringify({ schedule: updatedSchedule }),
+        withCredentials: true,
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.status === 200) {
+        console.log('Schedule updated successfully');
+        fetchTournamentSchedule(); // Re-fetch the updated schedule
+      } else {
+        console.error('Failed to update schedule:', response);
+      }
+    } catch (error) {
+      console.error('Error updating schedule:', error);
+    }
+  };
+  
+
+  // Function to prevent the default handling of the dragover event to allow dropping
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -390,53 +478,61 @@ const saveRoomAssignments = async () => {
 
 
       <textarea
-    value={roomInputs}
-    onChange={handleRoomInputChange}
-    placeholder="Enter room numbers, one number per line"
-  ></textarea>
+      value={roomInputs}
+      onChange={handleRoomInputChange}
+      placeholder="Enter room numbers, one number per line"
+    ></textarea>
+    
   <button onClick={assignRooms}>Assign Rooms</button>
-
-  <section className="schedule">
-      <form onSubmit={handleRoomSubmit}>
-        {roundsData.map((round, roundIndex) => (
-          <div key={roundIndex}>
-            <h2>Round {roundIndex + 1}</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Affirmative</th>
-                  <th>Negative</th>
-                  <th>Judge</th>
-                  <th>Room</th>
-                </tr>
-              </thead>
-              <tbody>
-                {round.map((match, matchIndex) => {
-                  const globalMatchIndex = roundIndex * roundsData[0].length + matchIndex;
-                  const matchKey = `match${globalMatchIndex}`;
-                  return (
-                    <tr key={matchIndex}>
-                      <td>{match.affirmative}</td>
-                      <td>{match.negative}</td>
-                      <td>{match.judge}</td>
+      <section className="schedule">
+        <form onSubmit={handleRoomSubmit}>
+          {roundsData.map((round, roundIndex) => (
+            <div key={round.id}>
+              <h2>Round {roundIndex + 1}</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Affirmative</th>
+                    <th>Negative</th>
+                    <th>Judge</th>
+                    <th>Room</th> {/* Add other headers as needed */}
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.isArray(round.matches) ? round.matches.map((match, matchIndex) => (
+                    <tr key={match.id}>
+                      {Object.keys(match).map((cellType) => {
+                        if (cellType === 'id') return null; // Skip the id field
+                        const cellData = { id: match.id, roundId: round.id, matchIndex, cellType };
+                        return (
+                          <td
+                            key={`${match.id}-${cellType}`}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, cellData)}
+                            onDrop={(e) => handleDrop(e, cellData)}
+                            onDragOver={handleDragOver}
+                          >
+                            {match[cellType]}
+                          </td>
+                        );
+                      })}
                       <td>
                         <input
                           type="text"
-                          value={roomAssignments[matchKey] || ''}
-                          onChange={(e) => updateRoomAssignment(matchKey, e.target.value)}
+                          value={roomAssignments[`match${ matchIndex * roundsData[0].length + matchIndex}`] || ''}
+                          onChange={(e) => updateRoomAssignment(`match${ matchIndex * roundsData[0].length + matchIndex}`, e.target.value)}
                           onBlur={() => saveRoomAssignments()} 
                         />
-                      </td>
+                      </td> 
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ))}
-        <button type="submit" style={{ display: "none" }}>Save Rooms</button>
-      </form>
-    </section>
+                  )) : <tr><td colSpan="4">No matches for this round.</td></tr>}
+                </tbody>
+              </table>
+            </div>
+          ))}
+          <button type="submit" style={{ display: "none" }}>Save Rooms</button>
+        </form>
+      </section>
 
     
     {modal && (
