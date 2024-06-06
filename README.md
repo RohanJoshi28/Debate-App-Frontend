@@ -4,6 +4,7 @@
 2) Run the command: npm install
 3) Run the command: npm start
 4) In package.json, the "proxy" field should be either http://localhost:5000 or http://127.0.0.1:5000
+5) Make sure to run the backend as well (backend is on separate repo: https://github.com/RohanJoshi28/debate-app-backend) 
 
 
 # Getting Started with Create React App
