@@ -1,3 +1,11 @@
+#Installation and Setup
+
+1) Clone the repo
+2) Run the command: npm install
+3) Run the command: npm start
+4) In package.json, the "proxy" field should be either http://localhost:5000 or http://127.0.0.1:5000
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
